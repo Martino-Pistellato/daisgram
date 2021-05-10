@@ -91,14 +91,14 @@ float Tensor::operator()(int i, int j, int k) const
 {
     if (i < 0 or i > r or j < 0 or j > c or k < 0 or k > d)
         throw index_out_of_bound();
-    return channels[k][i*r + j];;
+    return channels[k][i*c + j];
 }
 
 float& Tensor::operator()(int i, int j, int k)
 {
     if (i < 0 or i > r or j < 0 or j > c or k < 0 or k > d)
         throw index_out_of_bound();
-    return channels[k][i*r + j];;
+    return channels[k][i*c + j];
 }
 
 float Tensor::getMax(int k) const
@@ -221,4 +221,17 @@ Tensor& Tensor::operator=(const Tensor& other)
 void Tensor::init(int r, int c, int d, float v)
 {
     Tensor(r, c, d, v);
+}
+
+Tensor Tensor::padding(int pad_h, int pad_w)const
+{
+    //Chiamata constructor con la nuova dimensione
+    Tensor result{r+2*pad_h,c+2*pad_w,d};
+
+    for (int k = 0; k < d; ++k) //k for depth, i for rows and j for columns
+        for (int i = pad_h; i < result.r - pad_h; ++i)
+            for (int j = pad_w; j < result.c - pad_w; ++j)
+                result(i,j,k) = (*this)(i-pad_h,j-pad_w,k);
+
+    return result;
 }

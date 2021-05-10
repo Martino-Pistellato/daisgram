@@ -33,7 +33,7 @@ public:
      * Parameter-less class constructor 
      */
     Tensor();
-
+    
     /**
      * Class constructor
      * 
