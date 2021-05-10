@@ -217,3 +217,8 @@ Tensor& Tensor::operator=(const Tensor& other)
 
     return *this;
 }
+
+void Tensor::init(int r, int c, int d, float v)
+{
+    Tensor(r, c, d, v);
+}
