@@ -19,7 +19,7 @@ class Tensor
 {
 private:
 
-    float*** channels = nullptr; //<-- you are free to change this data structure (don't use std::vectors or std::array)
+    float** channels = nullptr; //<-- you are free to change this data structure (don't use std::vectors or std::array)
 
     int r = 0;  // number of rows
     int c = 0;  // number of columns

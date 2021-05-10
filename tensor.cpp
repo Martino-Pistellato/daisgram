@@ -15,15 +15,15 @@ using namespace std;
 
 void Tensor::init_random(float mean, float std)
 {
-    if(channels)
+    if (channels)
     {
         std::default_random_engine generator;
         std::normal_distribution<float> distribution(mean,std);
 
-        for(int i=0;i<r;i++)
-            for(int j=0;j<c;j++)
-                for(int k=0;k<d;k++)
-                    this->operator()(i,j,k)= distribution(generator);
+        for(int i = 0; i < r; ++i)
+            for(int j = 0; j < c; ++j)
+                for(int k = 0; k < d; ++k)
+                    this->operator()(i,j,k) = distribution(generator);
     }
     else
         throw(tensor_not_initialized());
@@ -39,27 +39,21 @@ Tensor::Tensor()
 
 Tensor::Tensor(int r, int c, int d, float v)
 {
-    if (r <= 0 or c <= 0 or d <= 0) 
-        throw dimension_mismatch();
+    if (r <= 0 or c <= 0 or d <= 0)
+            throw dimension_mismatch();
 
-    this->r = r;
-    this->c = c;
-    this->d = d;
-    channels = new float**[d];
-    channels[0] = new float*[r*d];
-    channels[0][0] = new float[r*c*d]; //matrix is the big flattened array
-    
-    for (int i = 0; i < d; ++i)
-    {
-        channels[i] = &channels[0][i*r];
+        this->r = r;
+        this->c = c;
+        this->d = d;
 
-        for (int j = 0; j < r; ++j)
-        {
-            channels[0][j+(i*r)] = &channels[0][0][(j+(i*r))*c];
-            for (int k = 0; k < c; k++)
-                channels[0][0][(j+(i*r))*c + k] = v;
-        }
-    }
+        channels = new float*[d];
+        channels[0] = new float[r*c*d];
+
+        for (int i = 0; i < d; ++i)
+            channels[i] = &channels[0][i*(r*c)];
+
+        for (int i = 0; i < r*c*d; ++i)
+            channels[0][i] = v;
 }
 
 Tensor::Tensor(const Tensor& that)
@@ -70,22 +64,14 @@ Tensor::Tensor(const Tensor& that)
         this->c = that.c;
         this->d = that.d;
 
-        channels = new float**[d];
-        channels[0] = new float*[r*d];
-        channels[0][0] = new float[r*c*d];
+        channels = new float*[d];
+        channels[0] = new float[r*c*d];
 
         for (int i = 0; i < d; ++i)
-        {
-            channels[i] = &channels[0][i*r];
+            channels[i] = &channels[0][i*(r*c)];
 
-            for (int j = 0; j < r; ++j)
-                channels[0][j+(i*r)] = &channels[0][0][(j+(i*r))*c];
-        }
-
-        for (int i = 0; i < d; ++i)
-            for (int j = 0; j < r; ++j)
-                for (int k = 0; k < c; ++k)
-                    channels[i][j][k] = that.channels[i][j][k];
+        for (int i = 0; i < r*c*d; ++i)
+            channels[0][i] = that.channels[0][i];
     }
     else
         channels = nullptr;
@@ -95,7 +81,6 @@ Tensor::~Tensor()
 {
     if (channels)
     {
-        delete[] channels[0][0];
         delete[] channels[0];
         delete[] channels;
         channels = nullptr;
@@ -106,14 +91,14 @@ float Tensor::operator()(int i, int j, int k) const
 {
     if (i < 0 or i > r or j < 0 or j > c or k < 0 or k > d)
         throw index_out_of_bound();
-    return channels[k][i][j];
+    return channels[k][i*r + j];;
 }
 
 float& Tensor::operator()(int i, int j, int k)
 {
     if (i < 0 or i > r or j < 0 or j > c or k < 0 or k > d)
         throw index_out_of_bound();
-    return channels[k][i][j];
+    return channels[k][i*r + j];;
 }
 
 float Tensor::getMax(int k) const
@@ -121,12 +106,12 @@ float Tensor::getMax(int k) const
     if (not channels) throw tensor_not_initialized();
     if (k > d or k < 0) throw index_out_of_bound();
 
-    float max{channels[k][0][0]};
+    float max{channels[k][0]};
 
     for (int i = 0; i < r; ++i)
         for (int j = 0; j < c; ++j)
-            if (channels[k][i][j] > max) max = channels[k][i][j];
-    
+            if (channels[k][i*r + j] > max) max = channels[k][i*r + j];
+        
     return max;
 }
 
@@ -135,12 +120,12 @@ float Tensor::getMin(int k) const
     if (not channels) throw tensor_not_initialized();
     if (k > d or k < 0) throw index_out_of_bound();
 
-    float min{channels[k][0][0]};
+    float min{channels[k][0]};
 
     for (int i = 0; i < r; ++i)
         for (int j = 0; j < c; ++j)
-            if (channels[k][i][j] < min) min = channels[k][i][j];
-    
+            if (channels[k][i*r + j] < min) min = channels[k][i*r + j];
+        
     return min;
 }
 
@@ -154,7 +139,7 @@ Tensor Tensor::operator-(const Tensor &rhs) const
         for (int i = 0; i < r; ++i)
             for (int j = 0; j < c; ++j)
                 result(i,j,k) -= rhs(i,j,k);
-    
+        
     return result;
 }
 
@@ -168,7 +153,7 @@ Tensor Tensor::operator+(const Tensor &rhs) const
         for (int i = 0; i < r; ++i)
             for (int j = 0; j < c; ++j)
                 result(i,j,k) += rhs(i,j,k);
-    
+        
     return result;
 }
 
@@ -182,7 +167,7 @@ Tensor Tensor::operator*(const Tensor &rhs) const
         for (int i = 0; i < r; ++i)
             for (int j = 0; j < c; ++j)
                 result(i,j,k) *= rhs(i,j,k);
-    
+        
     return result;
 }
 
@@ -201,7 +186,7 @@ Tensor Tensor::operator/(const Tensor &rhs) const
                 else
                     throw unknown_operation{};
             }
-    
+
     return result;
 }
 
@@ -209,7 +194,6 @@ Tensor& Tensor::operator=(const Tensor& other)
 {
     if (channels)
     {
-        delete[] channels[0][0];
         delete[] channels[0];
         delete[] channels;
     }
@@ -219,25 +203,17 @@ Tensor& Tensor::operator=(const Tensor& other)
         this->c = other.c;
         this->d = other.d;
 
-        channels = new float**[d];
-        channels[0] = new float*[r*d];
-        channels[0][0] = new float[r*c*d];
+        channels = new float*[d];
+        channels[0] = new float[r*c*d];
 
         for (int i = 0; i < d; ++i)
-        {
-            channels[i] = &channels[0][i*r];
+            channels[i] = &channels[0][i*(r*c)];
 
-            for (int j = 0; j < r; ++j)
-                channels[0][j+(i*r)] = &channels[0][0][(j+(i*r))*c];
-        }
-
-        for (int i = 0; i < d; ++i)
-            for (int j = 0; j < r; ++j)
-                for (int k = 0; k < c; ++k)
-                    channels[i][j][k] = other.channels[i][j][k];
+        for (int i = 0; i < r*c*d; ++i)
+            channels[0][i] = other.channels[0][i];
     }
     else
-        channels = nullptr; 
+        channels = nullptr;
 
     return *this;
 }
