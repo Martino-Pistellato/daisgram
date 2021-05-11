@@ -54,7 +54,7 @@ int DAISGram::getRows() {return data.rows();}
 int DAISGram::getCols() {return data.cols();}
 int DAISGram::getDepth() {return data.depth();}
 
-void swap(Tensor& T, int rhs, int lhs)
+void _swap(Tensor& T, int rhs, int lhs)
 {
     Tensor tmp{T};
 
@@ -73,9 +73,9 @@ DAISGram DAISGram::warhol()
 
     Tensor RG{data}, GB{data}, RB{data};
     DAISGram result{*this};
-    swap(RG,0,1);
-    swap(GB,1,2);
-    swap(RB,0,2);
+    _swap(RG,0,1);
+    _swap(GB,1,2);
+    _swap(RB,0,2);
 
     result.data.concat(RG,1);
     BG.concat(RB,1);

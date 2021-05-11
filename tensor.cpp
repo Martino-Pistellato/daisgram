@@ -47,21 +47,20 @@ Tensor::Tensor()
 
 Tensor::Tensor(int r, int c, int d, float v)
 {
-    if (r <= 0 or c <= 0 or d <= 0)
-        throw dimension_mismatch();
+    if (r <= 0 or c <= 0 or d <= 0) throw dimension_mismatch();
 
-        this->r = r;
-        this->c = c;
-        this->d = d;
+    this->r = r;
+    this->c = c;
+    this->d = d;
 
-        channels = new float*[d];
-        channels[0] = new float[r*c*d];
+    channels = new float*[d];
+    channels[0] = new float[r*c*d];
 
-        for (int i = 0; i < d; ++i)
-            channels[i] = &channels[0][i*(r*c)];
+    for (int i = 0; i < d; ++i)
+        channels[i] = &channels[0][i*(r*c)];
 
-        for (int i = 0; i < r*c*d; ++i)
-            channels[0][i] = v;
+    for (int i = 0; i < r*c*d; ++i)
+        channels[0][i] = v;
 }
 
 Tensor::Tensor(const Tensor& that)
