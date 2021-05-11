@@ -32,6 +32,10 @@ void Tensor::init_random(float mean, float std)
 int Tensor::rows()const {return r;}
 int Tensor::cols()const {return c;}
 int Tensor::depth()const {return d;}
+void Tensor::showSize()const
+{
+    cout << r << " x " << c << " x " << d << endl;
+}
 
 Tensor::Tensor()
 {
