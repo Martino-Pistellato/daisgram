@@ -228,10 +228,83 @@ Tensor Tensor::padding(int pad_h, int pad_w)const
     //Chiamata constructor con la nuova dimensione
     Tensor result{r+2*pad_h,c+2*pad_w,d};
 
-    for (int k = 0; k < d; ++k) //k for depth, i for rows and j for columns
+    for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
         for (int i = pad_h; i < result.r - pad_h; ++i)
             for (int j = pad_w; j < result.c - pad_w; ++j)
                 result(i,j,k) = (*this)(i-pad_h,j-pad_w,k);
 
     return result;
+}
+
+bool axis_validation(const Tensor& lhs, const Tensor& rhs, int axis) {
+    if(axis < 0 || axis > 2) return 0;
+    if(axis == 0) return lhs.cols() == rhs.cols() && lhs.depth() == rhs.depth();
+    if(axis == 1) return lhs.rows() == rhs.rows() && lhs.depth() == rhs.depth();
+    if(axis == 2) return lhs.cols() == rhs.cols() && lhs.rows() == rhs.rows();
+}
+
+/** 
+ * Concatenate 
+ * 
+ * The function concatenates two tensors along a give axis
+ * 
+ * Example: this is of size 10x5x6 and rhs is of 25x5x6
+ * 
+ * if concat on axis 0 (row) the result will be a new Tensor of size 35x5x6
+ * 
+ * if concat on axis 1 (columns) the operation will fail because the number 
+ * of rows are different (10 and 25).
+ * 
+ * In order to perform the concatenation is mandatory that all the dimensions 
+ * different from the axis should be equal, other wise throw concat_wrong_dimension(). 
+ *  
+ * @param rhs The tensor to concatenate with
+ * @param axis The axis along which perform the concatenation 
+ * @return a new Tensor containing the result of the concatenation
+ */
+Tensor Tensor::concat(const Tensor &rhs, int axis=0) const {
+
+    if(!axis_validation(*this, rhs, axis)) throw concat_wrong_dimension();
+
+    Tensor result{};
+
+    //creo tensore con dimensioni aggiornate
+    if(axis == 0) {
+        result.init(r + rhs.r, c, d);
+
+        for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
+            for (int i = 0; i < result.r; ++i)
+                for (int j = 0; j < result.c; ++j) {
+
+                    if(i >= r) result(i,j,k) = rhs(i,j,k);
+                    else result(i,j,k) = (*this)(i,j,k);
+
+                }
+    }
+    else if(axis == 1){
+        result.init(r, c + rhs.c, d);
+
+        for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
+            for (int i = 0; i < result.r; ++i)
+                for (int j = 0; j < result.c; ++j) {
+
+                    if(j >= c) result(i,j,k) = rhs(i,j,k);
+                    else result(i,j,k) = (*this)(i,j,k);
+                    
+                }
+    }
+    else if(axis == 2){
+        result.init(r, c, d + rhs.d);
+
+        for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
+            for (int i = 0; i < result.r; ++i)
+                for (int j = 0; j < result.c; ++j) {
+
+                    if(k >= d) result(i,j,k) = rhs(i,j,k);
+                    else result(i,j,k) = (*this)(i,j,k);
+                    
+                }
+    } 
+    return result;
+
 }
