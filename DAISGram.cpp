@@ -83,3 +83,26 @@ DAISGram DAISGram::warhol()
 
     return result;
 }
+
+DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[])
+{
+    if (data.depth() != 3)
+        throw dimension_mismatch();
+
+    DAISGram result{*this};
+
+    for (int i = 0; i < result.getRows(); ++i)
+        for (int j = 0; j < result.getCols(); ++j)
+        {
+            int tmp = 0;
+
+            for (int k = 0; k < result.getDepth(); ++k)
+                tmp += (result.data(i,j,k) >= rgb[k] - threshold[k]) and (result.data(i,j,k) <= rgb[k] + threshold[k]);
+
+            if (tmp == 3)
+                for (int k = 0; k < result.depth(); ++k)
+                    result.data(i,j,k) = bkg.data(i,j,k);
+        }
+            
+    return result;
+}
