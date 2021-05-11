@@ -57,7 +57,7 @@ int DAISGram::getDepth() {return data.depth();}
 void _swap(Tensor& T, int rhs, int lhs)
 {
     Tensor tmp{T};
-
+ 
     for (int i = 0; i < T.rows(); ++i)
         for (int j = 0; j < T.cols(); ++j)
         {
@@ -78,13 +78,13 @@ DAISGram DAISGram::warhol()
     _swap(RB,0,2);
 
     result.data.concat(RG,1);
-    BG.concat(RB,1);
-    result.data.concat(BG,0);
+    GB.concat(RB,1);
+    result.data.concat(GB,0);
 
     return result;
 }
 
-DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[])
+DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //threshold = margine errore
 {
     if (data.depth() != 3)
         throw dimension_mismatch();
@@ -99,10 +99,38 @@ DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[])
             for (int k = 0; k < result.getDepth(); ++k)
                 tmp += (result.data(i,j,k) >= rgb[k] - threshold[k]) and (result.data(i,j,k) <= rgb[k] + threshold[k]);
 
-            if (tmp == 3)
-                for (int k = 0; k < result.depth(); ++k)
+            if (tmp == result.getDepth())
+                for (int k = 0; k < result.data.depth(); ++k)
                     result.data(i,j,k) = bkg.data(i,j,k);
         }
             
     return result;
 }
+
+/*DAISGram DAISGram::edge()
+{
+    DAISGram T{*this};
+    Tensor filtro{3,3,1};
+
+    filtro(0,0,0) = -1;
+    filtro(0,1,0) = -1;
+    filtro(0,2,0) = -1;
+    filtro(1,0,0) = -1;
+    filtro(1,1,0) = 8;
+    filtro(1,2,0) = -1;
+    filtro(2,0,0) = -1;
+    filtro(2,1,0) = -1;
+    filtro(2,2,0) = -1;
+
+    T.data = T.data.convolve(filtro);
+
+    return T;
+}
+
+DAISGram::~DAISGram(){
+    delete &data;
+}
+
+DAISGram::DAISGram(){
+    //data = Tensor{};
+}*/

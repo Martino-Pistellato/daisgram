@@ -243,8 +243,8 @@ Tensor Tensor::padding(int pad_h, int pad_w)const
     return result;
 }
 
-Tensor Tensor::concat(const Tensor &rhs, int axis) const {
-
+Tensor Tensor::concat(const Tensor &rhs, int axis) const 
+{
     Tensor result{};
     switch (axis)
     {
@@ -256,7 +256,7 @@ Tensor Tensor::concat(const Tensor &rhs, int axis) const {
 
     for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
         for (int i = 0; i < result.r; ++i)
-            for (int j = 0; j < result.c; ++j) 
+            for (int j = 0; j < result.c; ++j)
             {
                 switch (axis)
                 {
@@ -304,4 +304,67 @@ Tensor Tensor::subset(unsigned int row_start,
                 result(i - row_start, j - col_start, k - depth_start) = (*this)(i,j,k);
 
     return result;
+}
+
+Tensor Tensor::convolve(const Tensor &f)const
+{
+    if (f.r % 2 == 0 or f.c % 2 == 0) throw filter_odd_dimensions();
+
+    int pad_h = (f.r - 1) / 2;
+    int pad_w = (f.c - 1) / 2;
+    Tensor result{r,c,d}, tmp_tensor{};
+    int col_start{0};
+    float tmp_float{0};
+
+    tmp_tensor = padding(pad_h,pad_w);
+
+    for (int i = 0; i < r; ++i)
+    {
+        for (int j = 0; j < c; ++j)
+        {
+            for (int k = 0; k < d; k++)
+            {
+                for (int i2 = i; i2 < i + f.r; ++i2)
+                    for (int j2 = col_start; j2 < col_start + f.c; ++j2)
+                        tmp_float += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - col_start, 0);
+
+                result(i,j,k) = tmp_float;
+                tmp_float = 0;
+            }
+            col_start++;
+        }
+        col_start = 0;
+    }
+
+    return result;
+}
+
+void Tensor::stampa() const
+{
+    for (int k = 0; k < d; ++k)
+    {
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                cout << (*this)(i,j,k) << " ";
+            cout << endl;
+        }
+        cout << endl;
+    }
+}
+
+void Tensor::clamp(float low, float high)
+{
+    for (int k = 0; k < d; ++k)
+    {
+        float min = getMin(k);
+        float max = getMax(k);
+
+        for (int i = 0; i < r; ++i)
+            for (int j = 0; j < c; ++j)
+            {
+                if ((*this)(i,j,k) == min) (*this)(i,j,k) = low;
+                if ((*this)(i,j,k) == max) (*this)(i,j,k) = high;
+            }
+    }
 }

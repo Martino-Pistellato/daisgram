@@ -299,7 +299,7 @@ public:
      * 
      * The filter f must have odd dimensions and same depth. 
      * 
-     * Remeber to apply the padding before running the convolution
+     * Remember to apply the padding before running the convolution
      *  
      * @param f The filter
      * @return a new Tensor containing the result of the convolution
