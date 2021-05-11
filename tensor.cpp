@@ -3,6 +3,7 @@
 #include <random>
 #include <math.h>
 #include <fstream>
+#include <sstream>
 
 #include "dais_exc.h"
 #include "tensor.h"
@@ -367,4 +368,57 @@ void Tensor::clamp(float low, float high)
                 if ((*this)(i,j,k) == max) (*this)(i,j,k) = high;
             }
     }
+}
+
+void Tensor::read_file(string filename)
+{
+    ifstream myfile(filename); //open file
+
+    if (!myfile.is_open()) throw unable_to_read_file();
+    
+    myfile >> r >> c >> d; //prime tre righe
+
+    init(r, c, d);
+
+    for(int k = 0; k < d; k++)
+        for(int i = 0; i < r; i++)
+            for(int j = 0; j < c; j++)
+                myfile >> (*this)(i,j,k); 
+    
+    myfile.close();
+}
+
+void Tensor::write_file(string filename)
+{
+    ofstream myfile(filename); //open file
+
+    myfile << r << endl << c << endl << d << endl; //prime tre righe
+
+    for(int k = 0; k < d; k++)
+        for(int i = 0; i < r; i++)
+            for(int j = 0; j < c; j++)
+                myfile << (*this)(i,j,k) << endl;
+    
+    myfile.close();
+}
+
+/*
+ * [..., ..., 0]
+ * [..., ..., 1]
+ * ...
+ * [..., ..., k]
+ */
+ostream& operator<< (ostream& stream, const Tensor & obj)
+{
+    for(int k = 0; k < obj.d; k++)
+    {
+        for(int i = 0; i < obj.r; i++)
+        {
+            for(int j = 0; j < obj.c; j++)
+                stream << "[" << obj(i,j,k) << "] ";
+            stream << endl;
+        }
+        stream << endl;
+    }
+    return stream;
 }
