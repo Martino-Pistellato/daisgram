@@ -27,6 +27,7 @@ private:
 
 public:
 
+    void stampa()const;
     /**
      * Class constructor
      * 

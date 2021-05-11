@@ -29,10 +29,6 @@ void Tensor::init_random(float mean, float std)
         throw(tensor_not_initialized());
 }
 
-int Tensor::rows()const {return r;}
-int Tensor::cols()const {return c;}
-int Tensor::depth()const {return d;}
-
 Tensor::Tensor()
 {
     channels = nullptr;
@@ -44,7 +40,7 @@ Tensor::Tensor()
 Tensor::Tensor(int r, int c, int d, float v)
 {
     if (r <= 0 or c <= 0 or d <= 0)
-        throw dimension_mismatch();
+            throw dimension_mismatch();
 
         this->r = r;
         this->c = c;
@@ -240,15 +236,19 @@ Tensor Tensor::padding(int pad_h, int pad_w)const
     return result;
 }
 
-Tensor Tensor::concat(const Tensor &rhs, int axis) const {
+int Tensor::rows()const {return r;}
+int Tensor::cols()const {return c;}
+int Tensor::depth()const {return d;}
 
+Tensor Tensor::concat(const Tensor &rhs, int axis) const 
+{
     Tensor result{};
     switch (axis)
     {
         case 0: (c == rhs.c and d == rhs.d) ? result.init(r + rhs.r, c, d) : throw concat_wrong_dimension(); break;
         case 1: (r == rhs.r and d == rhs.d) ? result.init(r, c + rhs.c, d) : throw concat_wrong_dimension(); break;
-        case 2: (c == rhs.c and r == rhs.r) ? result.init(r, c, d + rhs.d) : throw concat_wrong_dimension(); break;
-        default: throw concat_wrong_dimension();
+        case 2: (c == rhs.c and r == rhs.r) ?  result.init(r, c, d + rhs.d) : throw concat_wrong_dimension(); break;
+        default: throw concat_wrong_dimension(); 
     }
 
     for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
@@ -264,19 +264,6 @@ Tensor Tensor::concat(const Tensor &rhs, int axis) const {
             }
 
     return result;
-}
-
-void Tensor::rescale(float new_max)
-{
-    for (int k = 0; k < d; ++k)
-    {
-        float max = getMax(k);
-        float min = getMin(k);
-
-        for (int i = 0; i < r; ++i)
-            for (int j = 0; j < c; ++j)
-                (*this)(i,j,k) = (((*this)(i,j,k) - min) / (max - min)) * new_max;
-    }
 }
 
 Tensor Tensor::subset(unsigned int row_start, 
@@ -301,4 +288,27 @@ Tensor Tensor::subset(unsigned int row_start,
                 result(i - row_start, j - col_start, k - depth_start) = (*this)(i,j,k);
 
     return result;
+}
+
+void Tensor::stampa() const
+{
+    for (int k = 0; k < d; ++k)
+    {
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                cout << (*this)(i,j,k) << " ";
+            cout << endl;
+        }
+        cout << endl;
+    }
+}
+
+int main()
+{
+    Tensor prova1{5,5,2,1};
+    prova1.stampa();
+    Tensor conc {};
+    conc = prova1.subset(0,2,0,3,0,1);
+    conc.stampa();
 }
