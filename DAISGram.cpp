@@ -8,12 +8,8 @@
 
 using namespace std;
 
-/**
- * Load a bitmap from file
- *
- * @param filename String containing the path of the file
- */
-void DAISGram::load_image(string filename){
+void DAISGram::load_image(string filename)
+{
     BmpImg img = BmpImg();
 
     img.read(filename.c_str());
@@ -23,54 +19,67 @@ void DAISGram::load_image(string filename){
 
     data = Tensor(h, w, 3, 0.0);
 
-    for(int i=0;i<img.get_height();i++){
-        for(int j=0;j<img.get_width();j++){ 
+    for(int i = 0; i < img.get_height(); ++i)
+        for(int j = 0; j < img.get_width(); ++j)
+        { 
             data(i,j,0) = (float) img.red_at(j,i);
             data(i,j,1) = (float) img.green_at(j,i);    
             data(i,j,2) = (float) img.blue_at(j,i);   
         }                
-    }
 }
 
-
-/**
- * Save a DAISGram object to a bitmap file.
- * 
- * Data is clamped to 0,255 before saving it.
- *
- * @param filename String containing the path where to store the image.
- */
-void DAISGram::save_image(string filename){
-
+void DAISGram::save_image(string filename)
+{
     data.clamp(0,255);
 
     BmpImg img = BmpImg(getCols(), getRows());
 
     img.init(getCols(), getRows());
 
-    for(int i=0;i<getRows();i++){
-        for(int j=0;j<getCols();j++){
+    for(int i = 0; i < getRows(); ++i)
+        for(int j = 0; j < getCols(); ++j)
             img.set_pixel(j,i,(unsigned char) data(i,j,0),(unsigned char) data(i,j,1),(unsigned char) data(i,j,2));                   
-        }                
-    }
 
     img.write(filename);
-
 }
-
-
-/**
- * Generate Random Image
- * 
- * Generate a random image from nois
- * 
- * @param h height of the image
- * @param w width of the image
- * @param d number of channels
- * @return returns a new DAISGram containing the generated image.
- */  
-void DAISGram::generate_random(int h, int w, int d){
+ 
+void DAISGram::generate_random(int h, int w, int d)
+{
     data = Tensor(h,w,d,0.0);
     data.init_random(128,50);
     data.rescale(255);
+}
+
+int DAISGram::getRows() {return data.rows();}
+int DAISGram::getCols() {return data.cols();}
+int DAISGram::getDepth() {return data.depth();}
+
+void swap(Tensor& T, int rhs, int lhs)
+{
+    Tensor tmp{T};
+
+    for (int i = 0; i < T.rows(); ++i)
+        for (int j = 0; j < T.cols(); ++j)
+        {
+            T(i,j,rhs) = tmp(i,j,lhs);
+            T(i,j,lhs) = tmp(i,j,rhs);
+        }
+}
+
+DAISGram DAISGram::warhol()
+{
+    if (data.depth() < 3)
+        throw dimension_mismatch(); 
+
+    Tensor RG{data}, GB{data}, RB{data};
+    DAISGram result{*this};
+    swap(RG,0,1);
+    swap(GB,1,2);
+    swap(RB,0,2);
+
+    result.data.concat(RG,1);
+    BG.concat(RB,1);
+    result.data.concat(BG,0);
+
+    return result;
 }

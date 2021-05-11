@@ -27,7 +27,7 @@ private:
 
 public:
 
-    void stampa()const;
+    void stampa()const; //TODO #2 DA ELIMINARE
     /**
      * Class constructor
      * 
