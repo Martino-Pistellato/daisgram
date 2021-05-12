@@ -6,7 +6,7 @@
 
 #include "dais_exc.h"
 #include "tensor.h"
-//#include "DAISGram.h"
+#include "DAISGram.h"
 
 #define PI 3.141592654
 #define FLT_MAX 3.402823466e+38F /* max value */
@@ -16,14 +16,7 @@ using namespace std;
 
 int main()
 {
-    
-    Tensor prova1{7,7,3,1};
-    //DAISGram dais{}; TODO #3 correggere innanzituto il costruttore
-
-    //cout << prova1 << endl;
-    
-    //dais.load_image("C:/Users/User/Desktop/daisgram_group_5/images/dais.bmp");
-
-    //dais.edge().save_image("results/prova/dais_edge.bmp");
-
+    DAISGram dais{};
+    dais.load_image("/mnt/c/Users/User/Desktop/daisgram_group_5/images/dais.bmp");
+    dais.warhol().save_image("results/prova/dais_warhol.bmp");
 }

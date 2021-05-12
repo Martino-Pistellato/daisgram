@@ -11,12 +11,12 @@ using namespace std;
 void DAISGram::load_image(string filename)
 {
     BmpImg img = BmpImg();
-
+    
     img.read(filename.c_str());
-
+    
     const int h = img.get_height();
     const int w = img.get_width();
-
+    
     data = Tensor(h, w, 3, 0.0);
 
     for(int i = 0; i < img.get_height(); ++i)
@@ -25,7 +25,7 @@ void DAISGram::load_image(string filename)
             data(i,j,0) = (float) img.red_at(j,i);
             data(i,j,1) = (float) img.green_at(j,i);    
             data(i,j,2) = (float) img.blue_at(j,i);   
-        }                
+        }               
 }
 
 void DAISGram::save_image(string filename)
@@ -107,32 +107,34 @@ DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //t
     return result;
 }
 
-/*DAISGram DAISGram::edge()
+DAISGram DAISGram::sharpen()
 {
     DAISGram T{*this};
     Tensor filtro{3,3,1};
 
-    filtro(0,0,0) = -1;
+    filtro(0,0,0) = 0;
     filtro(0,1,0) = -1;
-    filtro(0,2,0) = -1;
+    filtro(0,2,0) = 0;
     filtro(1,0,0) = -1;
-    filtro(1,1,0) = 8;
+    filtro(1,1,0) = 5;
     filtro(1,2,0) = -1;
-    filtro(2,0,0) = -1;
+    filtro(2,0,0) = 0;
     filtro(2,1,0) = -1;
-    filtro(2,2,0) = -1;
+    filtro(2,2,0) = 0;
 
     T.data = T.data.convolve(filtro);
 
     return T;
 }
 
-DAISGram::~DAISGram(){
-    delete &data;
+DAISGram::~DAISGram()
+{
+    data.~Tensor();
 }
 
-DAISGram::DAISGram(){
-    //data = Tensor{};
-}*/
+DAISGram::DAISGram()
+{
+    data = Tensor();
+}
 
 //TODO aggiornare firme file.h da repository gitHub aggiornato

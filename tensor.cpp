@@ -370,7 +370,7 @@ void Tensor::clamp(float low, float high)
     }
 }
 
-void Tensor::read_file(string filename)
+void Tensor::read_file(string filename) // dubbio: nella write_file inserisce le quadre, ma nel read non le considera.  non rischia di dare problemi?
 {
     ifstream myfile(filename); //open file
 
