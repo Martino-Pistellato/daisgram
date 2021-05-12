@@ -123,7 +123,9 @@ DAISGram DAISGram::sharpen()
     filtro(2,2,0) = 0;
 
     T.data = T.data.convolve(filtro);
-
+    T.data.clamp(0,255);
+    T.data.rescale(255);
+    
     return T;
 }
 

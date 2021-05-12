@@ -18,5 +18,5 @@ int main()
 {
     DAISGram dais{};
     dais.load_image("/mnt/c/Users/User/Desktop/daisgram_group_5/images/dais.bmp");
-    dais.warhol().save_image("results/prova/dais_warhol.bmp");
+    dais.sharpen().save_image("results/prova/dais_sharp.bmp");
 }

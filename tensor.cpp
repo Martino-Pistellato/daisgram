@@ -364,8 +364,8 @@ void Tensor::clamp(float low, float high)
         for (int i = 0; i < r; ++i)
             for (int j = 0; j < c; ++j)
             {
-                if ((*this)(i,j,k) == min) (*this)(i,j,k) = low;
-                if ((*this)(i,j,k) == max) (*this)(i,j,k) = high;
+                if ((*this)(i,j,k) < low) (*this)(i,j,k) = low;
+                if ((*this)(i,j,k) > high) (*this)(i,j,k) = high;
             }
     }
 }
