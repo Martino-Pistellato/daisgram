@@ -44,21 +44,21 @@ class DAISGram{
          *
          * @return returns the number of rows in the image
          */
-        int getRows();
+        int getRows()const;
 
         /**
          * Get columns
          *
          * @return returns the number of columns in the image
          */
-        int getCols();
+        int getCols()const;
 
         /**
          * Get depth
          *
          * @return returns the number of channels in the image
          */
-        int getDepth();
+        int getDepth()const;
 
         /**
          * Brighten the image

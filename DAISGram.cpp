@@ -50,9 +50,9 @@ void DAISGram::generate_random(int h, int w, int d)
     data.rescale(255);
 }
 
-int DAISGram::getRows() {return data.rows();}
-int DAISGram::getCols() {return data.cols();}
-int DAISGram::getDepth() {return data.depth();}
+int DAISGram::getRows()const {return data.rows();}
+int DAISGram::getCols()const {return data.cols();}
+int DAISGram::getDepth()const {return data.depth();}
 
 void _swap(Tensor& T, int rhs, int lhs)
 {
@@ -139,4 +139,13 @@ DAISGram::DAISGram()
     data = Tensor();
 }
 
-//TODO aggiornare firme file.h da repository gitHub aggiornato
+DAISGram DAISGram::blend(const DAISGram & rhs, float alpha=0.5)
+{
+    if(getCols() != rhs.getCols() or getRows() != rhs.getRows() or getDepth() != rhs.getDepth()) throw dimension_mismatch();
+
+    DAISGram result{*this};
+
+    result.data = result.data * alpha + rhs.data * (1 - alpha);
+
+    return result;
+}
