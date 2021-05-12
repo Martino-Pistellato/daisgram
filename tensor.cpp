@@ -357,17 +357,12 @@ void Tensor::stampa() const
 void Tensor::clamp(float low, float high)
 {
     for (int k = 0; k < d; ++k)
-    {
-        float min = getMin(k);
-        float max = getMax(k);
-
         for (int i = 0; i < r; ++i)
             for (int j = 0; j < c; ++j)
             {
                 if ((*this)(i,j,k) < low) (*this)(i,j,k) = low;
-                if ((*this)(i,j,k) > high) (*this)(i,j,k) = high;
+                else if ((*this)(i,j,k) > high) (*this)(i,j,k) = high;
             }
-    }
 }
 
 void Tensor::read_file(string filename) // dubbio: nella write_file inserisce le quadre, ma nel read non le considera.  non rischia di dare problemi?
