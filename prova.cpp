@@ -14,9 +14,10 @@
 
 using namespace std;
 
+
 int main()
-{
+{   ///mnt/c/Users/User/Desktop/daisgram_group_5/
     DAISGram dais{};
-    dais.load_image("/mnt/c/Users/User/Desktop/daisgram_group_5/images/dais.bmp");
-    dais.sharpen().save_image("results/prova/dais_sharp.bmp");
+    dais.load_image("images/flower_hires.bmp");
+    dais.smooth(3).save_image("results/prova/flower_smooth.bmp");
 }
