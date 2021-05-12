@@ -136,13 +136,9 @@ DAISGram DAISGram::sharpen()
 DAISGram DAISGram::smooth(int h)
 {
     DAISGram T{*this};
-    Tensor filtro{3,3,1};
-    float c = 1 / (h*h); 
-
-    for(int i = 0; i < filtro.rows(); ++i)
-        for(int j = 0; j < filtro.cols(); ++j)
-            filtro(0,0,0) = c;
-
+    float c = 1 / ((float)h * (float)h); 
+    Tensor filtro{3,3,1,c};
+    
     T.data = T.data.convolve(filtro);
     T.data.clamp(0,255);
     T.data.rescale(255);

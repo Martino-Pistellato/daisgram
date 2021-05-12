@@ -18,6 +18,6 @@ using namespace std;
 int main()
 {   ///mnt/c/Users/User/Desktop/daisgram_group_5/
     DAISGram dais{};
-    dais.load_image("images/flower_hires.bmp");
-    dais.smooth(3).save_image("results/prova/flower_smooth.bmp");
+    dais.load_image("images/dais.bmp");
+    dais.smooth(3).save_image("results/prova/dais_smooth_3.bmp");
 }
