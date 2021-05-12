@@ -14,28 +14,18 @@
 
 using namespace std;
 
-void Tensor::init_random(float mean, float std)
+void Tensor::stampa() const
 {
-    if (channels)
+    for (int k = 0; k < d; ++k)
     {
-        std::default_random_engine generator;
-        std::normal_distribution<float> distribution(mean,std);
-
-        for(int i = 0; i < r; ++i)
-            for(int j = 0; j < c; ++j)
-                for(int k = 0; k < d; ++k)
-                    this->operator()(i,j,k) = distribution(generator);
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                cout << (*this)(i,j,k) << " ";
+            cout << endl;
+        }
+        cout << endl;
     }
-    else
-        throw(tensor_not_initialized());
-}
-
-int Tensor::rows()const {return r;}
-int Tensor::cols()const {return c;}
-int Tensor::depth()const {return d;}
-void Tensor::showSize()const
-{
-    cout << r << " x " << c << " x " << d << endl;
 }
 
 Tensor::Tensor()
@@ -64,27 +54,6 @@ Tensor::Tensor(int r, int c, int d, float v)
         channels[0][i] = v;
 }
 
-Tensor::Tensor(const Tensor& that)
-{
-    if (that.channels)
-    {
-        this->r = that.r;
-        this->c = that.c;
-        this->d = that.d;
-
-        channels = new float*[d];
-        channels[0] = new float[r*c*d];
-
-        for (int i = 0; i < d; ++i)
-            channels[i] = &channels[0][i*(r*c)];
-
-        for (int i = 0; i < r*c*d; ++i)
-            channels[0][i] = that.channels[0][i];
-    }
-    else
-        channels = nullptr;
-}
-
 Tensor::~Tensor()
 {
     if (channels)
@@ -109,32 +78,25 @@ float& Tensor::operator()(int i, int j, int k)
     return channels[k][i*c + j];
 }
 
-float Tensor::getMax(int k) const
+Tensor::Tensor(const Tensor& that)
 {
-    if (not channels) throw tensor_not_initialized();
-    if (k > d or k < 0) throw index_out_of_bound();
+    if (that.channels)
+    {
+        this->r = that.r;
+        this->c = that.c;
+        this->d = that.d;
 
-    float max{(*this)(0,0,k)};
+        channels = new float*[d];
+        channels[0] = new float[r*c*d];
 
-    for (int i = 0; i < r; ++i)
-        for (int j = 0; j < c; ++j)
-            if ((*this)(i,j,k) > max) max = (*this)(i,j,k);
-        
-    return max;
-}
+        for (int i = 0; i < d; ++i)
+            channels[i] = &channels[0][i*(r*c)];
 
-float Tensor::getMin(int k) const
-{
-    if (not channels) throw tensor_not_initialized();
-    if (k > d or k < 0) throw index_out_of_bound();
-
-    float min{(*this)(0,0,k)};
-
-    for (int i = 0; i < r; ++i)
-        for (int j = 0; j < c; ++j)
-            if ((*this)(i,j,k) < min) min = (*this)(i,j,k);
-        
-    return min;
+        for (int i = 0; i < r*c*d; ++i)
+            channels[0][i] = that.channels[0][i];
+    }
+    else
+        channels = nullptr;
 }
 
 Tensor Tensor::operator-(const Tensor &rhs) const
@@ -192,8 +154,72 @@ Tensor Tensor::operator/(const Tensor &rhs) const
                 if (rhs(i,j,k))
                     result(i,j,k) /= rhs(i,j,k);
                 else
-                    throw unknown_operation{};
+                    throw unknown_operation();
             }
+
+    return result;
+}
+
+Tensor Tensor::operator-(const float &rhs)const
+{
+    Tensor result{};
+
+    for (int k = 0; k < d; ++k)
+    {
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                result(i,j,k) = (*this)(i,j,k) - rhs;
+        }
+    }
+
+    return result;
+}
+
+Tensor Tensor::operator+(const float &rhs)const
+{
+    Tensor result{};
+
+    for (int k = 0; k < d; ++k)
+    {
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                result(i,j,k) = (*this)(i,j,k) + rhs;
+        }
+    }
+
+    return result;
+}
+
+Tensor Tensor::operator*(const float &rhs)const
+{
+    Tensor result{};
+
+    for (int k = 0; k < d; ++k)
+    {
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                result(i,j,k) = (*this)(i,j,k) * rhs;
+        }
+    }
+
+    return result;
+}
+
+Tensor Tensor::operator/(const float &rhs)const
+{
+    Tensor result{};
+
+    for (int k = 0; k < d; ++k)
+    {
+        for (int i = 0; i < r; ++i)
+        {
+            for (int j = 0; j < c; ++j)
+                result(i,j,k) = (*this)(i,j,k) / rhs;
+        }
+    }
 
     return result;
 }
@@ -226,9 +252,49 @@ Tensor& Tensor::operator=(const Tensor& other)
     return *this;
 }
 
+void Tensor::init_random(float mean, float std)
+{
+    if (channels)
+    {
+        std::default_random_engine generator;
+        std::normal_distribution<float> distribution(mean,std);
+
+        for(int i = 0; i < r; ++i)
+            for(int j = 0; j < c; ++j)
+                for(int k = 0; k < d; ++k)
+                    this->operator()(i,j,k) = distribution(generator);
+    }
+    else
+        throw(tensor_not_initialized());
+}
+
 void Tensor::init(int r, int c, int d, float v)
 {
     (*this) = Tensor(r, c, d, v);
+}
+
+void Tensor::clamp(float low, float high)
+{
+    for (int k = 0; k < d; ++k)
+        for (int i = 0; i < r; ++i)
+            for (int j = 0; j < c; ++j)
+            {
+                if ((*this)(i,j,k) < low) (*this)(i,j,k) = low;
+                else if ((*this)(i,j,k) > high) (*this)(i,j,k) = high;
+            }
+}
+
+void Tensor::rescale(float new_max)
+{
+    for (int k = 0; k < d; ++k)
+    {
+        float max = getMax(k);
+        float min = getMin(k);
+
+        for (int i = 0; i < r; ++i)
+            for (int j = 0; j < c; ++j)
+                (*this)(i,j,k) = (((*this)(i,j,k) - min) / (max - min)) * new_max;
+    }
 }
 
 Tensor Tensor::padding(int pad_h, int pad_w)const
@@ -240,6 +306,30 @@ Tensor Tensor::padding(int pad_h, int pad_w)const
         for (int i = pad_h; i < result.r - pad_h; ++i)
             for (int j = pad_w; j < result.c - pad_w; ++j)
                 result(i,j,k) = (*this)(i-pad_h,j-pad_w,k);
+
+    return result;
+}
+
+Tensor Tensor::subset(unsigned int row_start, 
+                      unsigned int row_end, 
+                      unsigned int col_start, 
+                      unsigned int col_end, 
+                      unsigned int depth_start, 
+                      unsigned int depth_end) const
+{
+    if (row_start > r or row_end > r or row_start < 0 or row_end < 0)
+        throw dimension_mismatch();
+    if (col_start > c or col_end > c or col_start < 0 or col_end < 0)
+        throw dimension_mismatch();
+    if (depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
+        throw dimension_mismatch();
+
+    Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
+
+    for (int k = depth_start; k < depth_end; ++k)
+        for (int i = row_start; i < row_end; ++i)
+            for (int j = col_start; j < col_end; ++j)
+                result(i - row_start, j - col_start, k - depth_start) = (*this)(i,j,k);
 
     return result;
 }
@@ -266,43 +356,6 @@ Tensor Tensor::concat(const Tensor &rhs, int axis) const
                     default: (i >= r) ? result(i,j,k) = rhs(i-r,j,k) : result(i,j,k) = (*this)(i,j,k); break; //default case is axis == 0
                 }
             }
-
-    return result;
-}
-
-void Tensor::rescale(float new_max)
-{
-    for (int k = 0; k < d; ++k)
-    {
-        float max = getMax(k);
-        float min = getMin(k);
-
-        for (int i = 0; i < r; ++i)
-            for (int j = 0; j < c; ++j)
-                (*this)(i,j,k) = (((*this)(i,j,k) - min) / (max - min)) * new_max;
-    }
-}
-
-Tensor Tensor::subset(unsigned int row_start, 
-                      unsigned int row_end, 
-                      unsigned int col_start, 
-                      unsigned int col_end, 
-                      unsigned int depth_start, 
-                      unsigned int depth_end) const
-{
-    if (row_start > r or row_end > r or row_start < 0 or row_end < 0)
-        throw dimension_mismatch();
-    if (col_start > c or col_end > c or col_start < 0 or col_end < 0)
-        throw dimension_mismatch();
-    if (depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
-        throw dimension_mismatch();
-
-    Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
-
-    for (int k = depth_start; k < depth_end; ++k)
-        for (int i = row_start; i < row_end; ++i)
-            for (int j = col_start; j < col_end; ++j)
-                result(i - row_start, j - col_start, k - depth_start) = (*this)(i,j,k);
 
     return result;
 }
@@ -340,29 +393,58 @@ Tensor Tensor::convolve(const Tensor &f)const
     return result;
 }
 
-void Tensor::stampa() const
+int Tensor::rows()const {return r;}
+
+int Tensor::cols()const {return c;}
+
+int Tensor::depth()const {return d;}
+
+float Tensor::getMin(int k) const
 {
-    for (int k = 0; k < d; ++k)
-    {
-        for (int i = 0; i < r; ++i)
-        {
-            for (int j = 0; j < c; ++j)
-                cout << (*this)(i,j,k) << " ";
-            cout << endl;
-        }
-        cout << endl;
-    }
+    if (not channels) throw tensor_not_initialized();
+    if (k > d or k < 0) throw index_out_of_bound();
+
+    float min{(*this)(0,0,k)};
+
+    for (int i = 0; i < r; ++i)
+        for (int j = 0; j < c; ++j)
+            if ((*this)(i,j,k) < min) min = (*this)(i,j,k);
+        
+    return min;
 }
 
-void Tensor::clamp(float low, float high)
+float Tensor::getMax(int k) const
 {
-    for (int k = 0; k < d; ++k)
-        for (int i = 0; i < r; ++i)
-            for (int j = 0; j < c; ++j)
-            {
-                if ((*this)(i,j,k) < low) (*this)(i,j,k) = low;
-                else if ((*this)(i,j,k) > high) (*this)(i,j,k) = high;
-            }
+    if (not channels) throw tensor_not_initialized();
+    if (k > d or k < 0) throw index_out_of_bound();
+
+    float max{(*this)(0,0,k)};
+
+    for (int i = 0; i < r; ++i)
+        for (int j = 0; j < c; ++j)
+            if ((*this)(i,j,k) > max) max = (*this)(i,j,k);
+        
+    return max;
+}
+
+void Tensor::showSize()const
+{
+    cout << r << " x " << c << " x " << d << endl;
+}
+
+ostream& operator<< (ostream& stream, const Tensor & obj)
+{
+    for(int k = 0; k < obj.d; k++)
+    {
+        for(int i = 0; i < obj.r; i++)
+        {
+            for(int j = 0; j < obj.c; j++)
+                stream << "[" << obj(i,j,k) << "] ";
+            stream << endl;
+        }
+        stream << endl;
+    }
+    return stream;
 }
 
 void Tensor::read_file(string filename) // dubbio: nella write_file inserisce le quadre, ma nel read non le considera.  non rischia di dare problemi?
@@ -395,25 +477,4 @@ void Tensor::write_file(string filename)
                 myfile << (*this)(i,j,k) << endl;
     
     myfile.close();
-}
-
-/*
- * [..., ..., 0]
- * [..., ..., 1]
- * ...
- * [..., ..., k]
- */
-ostream& operator<< (ostream& stream, const Tensor & obj)
-{
-    for(int k = 0; k < obj.d; k++)
-    {
-        for(int i = 0; i < obj.r; i++)
-        {
-            for(int j = 0; j < obj.c; j++)
-                stream << "[" << obj(i,j,k) << "] ";
-            stream << endl;
-        }
-        stream << endl;
-    }
-    return stream;
 }
