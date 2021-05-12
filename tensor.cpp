@@ -160,66 +160,52 @@ Tensor Tensor::operator/(const Tensor &rhs) const
     return result;
 }
 
-Tensor Tensor::operator-(const float &rhs)const
+Tensor Tensor::operator-(const float &rhs) const
 {
-    Tensor result{};
+    Tensor result{*this};
 
     for (int k = 0; k < d; ++k)
-    {
         for (int i = 0; i < r; ++i)
-        {
             for (int j = 0; j < c; ++j)
-                result(i,j,k) = (*this)(i,j,k) - rhs;
-        }
-    }
+                result(i,j,k) -= rhs;
 
     return result;
 }
 
-Tensor Tensor::operator+(const float &rhs)const
+Tensor Tensor::operator+(const float &rhs) const
 {
-    Tensor result{};
+    Tensor result{*this};
 
     for (int k = 0; k < d; ++k)
-    {
         for (int i = 0; i < r; ++i)
-        {
             for (int j = 0; j < c; ++j)
-                result(i,j,k) = (*this)(i,j,k) + rhs;
-        }
-    }
+                result(i,j,k) += rhs;
 
     return result;
 }
 
-Tensor Tensor::operator*(const float &rhs)const
+Tensor Tensor::operator*(const float &rhs) const
 {
-    Tensor result{};
+    Tensor result{*this};
 
     for (int k = 0; k < d; ++k)
-    {
         for (int i = 0; i < r; ++i)
-        {
             for (int j = 0; j < c; ++j)
-                result(i,j,k) = (*this)(i,j,k) * rhs;
-        }
-    }
+                result(i,j,k) *= rhs;
 
     return result;
 }
 
-Tensor Tensor::operator/(const float &rhs)const
+Tensor Tensor::operator/(const float &rhs) const
 {
-    Tensor result{};
+    if (not rhs) throw unknown_operation();
+
+    Tensor result{*this};
 
     for (int k = 0; k < d; ++k)
-    {
         for (int i = 0; i < r; ++i)
-        {
             for (int j = 0; j < c; ++j)
-                result(i,j,k) = (*this)(i,j,k) / rhs;
-        }
-    }
+                result(i,j,k) /= rhs;
 
     return result;
 }
@@ -265,7 +251,7 @@ void Tensor::init_random(float mean, float std)
                     this->operator()(i,j,k) = distribution(generator);
     }
     else
-        throw(tensor_not_initialized());
+        throw tensor_not_initialized();
 }
 
 void Tensor::init(int r, int c, int d, float v)
@@ -297,7 +283,7 @@ void Tensor::rescale(float new_max)
     }
 }
 
-Tensor Tensor::padding(int pad_h, int pad_w)const
+Tensor Tensor::padding(int pad_h, int pad_w) const
 {
     //Chiamata constructor con la nuova dimensione
     Tensor result{r+2*pad_h,c+2*pad_w,d};
@@ -360,7 +346,7 @@ Tensor Tensor::concat(const Tensor &rhs, int axis) const
     return result;
 }
 
-Tensor Tensor::convolve(const Tensor &f)const
+Tensor Tensor::convolve(const Tensor &f) const
 {
     if (f.r % 2 == 0 or f.c % 2 == 0) throw filter_odd_dimensions();
 

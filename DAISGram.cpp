@@ -61,23 +61,37 @@ int DAISGram::getDepth()const {return data.depth();}
 
 //Brighten
 
-DAISGram DAISGram::grayscale()
+DAISGram DAISGram::grayscale() 
 {
     DAISGram result{*this};
     float avg = 0.;
 
-    for(int k = 0; k < getDepth(); ++k)
-        for(int i = 0; i < getRows(); ++i)
-            for(int j = 0; j < getCols(); ++j)
-            {
-                for(int k2 = 0; k2 < getDepth(); ++k2) avg += (*this).data(i,j,k2);
+    for(int i = 0; i < getRows(); ++i)
+        for(int j = 0; j < getCols(); ++j)
+        {
+            for(int k = 0; k < getDepth(); ++k)
+                avg += (*this).data(i,j,k);
+            for(int k = 0; k < getDepth(); ++k)
                 result.data(i,j,k) = avg / getDepth();
-            }
+            avg = 0;
+        }
 
     return result;
 }
 
-DAISGram DAISGram::warhol()
+void _swap(Tensor& T, int rhs, int lhs)
+{
+    Tensor tmp{T};
+ 
+    for (int i = 0; i < T.rows(); ++i)
+        for (int j = 0; j < T.cols(); ++j)
+        {
+            T(i,j,rhs) = tmp(i,j,lhs);
+            T(i,j,lhs) = tmp(i,j,rhs);
+        }
+}
+
+DAISGram DAISGram::warhol() //da correggere
 {
     if (data.depth() < 3)
         throw dimension_mismatch(); 
@@ -119,7 +133,7 @@ DAISGram DAISGram::sharpen()
 
 //Emboss
 
-DAISGram DAISGram::smooth(int h=3)
+DAISGram DAISGram::smooth(int h)
 {
     DAISGram T{*this};
     Tensor filtro{3,3,1};
@@ -130,6 +144,7 @@ DAISGram DAISGram::smooth(int h=3)
             filtro(0,0,0) = c;
 
     T.data = T.data.convolve(filtro);
+    T.data.clamp(0,255);
     T.data.rescale(255);
     
     return T;
@@ -137,7 +152,7 @@ DAISGram DAISGram::smooth(int h=3)
 
 //Edge
 
-DAISGram DAISGram::blend(const DAISGram & rhs, float alpha=0.5)
+DAISGram DAISGram::blend(const DAISGram & rhs, float alpha)
 {
     if(getCols() != rhs.getCols() or getRows() != rhs.getRows() or getDepth() != rhs.getDepth()) throw dimension_mismatch();
 
@@ -178,16 +193,4 @@ void DAISGram::generate_random(int h, int w, int d)
     data = Tensor(h,w,d,0.0);
     data.init_random(128,50);
     data.rescale(255);
-}
-
-void _swap(Tensor& T, int rhs, int lhs)
-{
-    Tensor tmp{T};
- 
-    for (int i = 0; i < T.rows(); ++i)
-        for (int j = 0; j < T.cols(); ++j)
-        {
-            T(i,j,rhs) = tmp(i,j,lhs);
-            T(i,j,lhs) = tmp(i,j,rhs);
-        }
 }
