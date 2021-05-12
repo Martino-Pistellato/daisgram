@@ -8,6 +8,16 @@
 
 using namespace std;
 
+DAISGram::DAISGram()
+{
+    data = Tensor();
+}
+
+DAISGram::~DAISGram()
+{
+    data.~Tensor();
+}
+
 void DAISGram::load_image(string filename)
 {
     BmpImg img = BmpImg();
@@ -42,28 +52,29 @@ void DAISGram::save_image(string filename)
 
     img.write(filename);
 }
- 
-void DAISGram::generate_random(int h, int w, int d)
-{
-    data = Tensor(h,w,d,0.0);
-    data.init_random(128,50);
-    data.rescale(255);
-}
 
 int DAISGram::getRows()const {return data.rows();}
+
 int DAISGram::getCols()const {return data.cols();}
+
 int DAISGram::getDepth()const {return data.depth();}
 
-void _swap(Tensor& T, int rhs, int lhs)
+//Brighten
+
+DAISGram DAISGram::grayscale()
 {
-    Tensor tmp{T};
- 
-    for (int i = 0; i < T.rows(); ++i)
-        for (int j = 0; j < T.cols(); ++j)
-        {
-            T(i,j,rhs) = tmp(i,j,lhs);
-            T(i,j,lhs) = tmp(i,j,rhs);
-        }
+    DAISGram result{*this};
+    float avg = 0.;
+
+    for(int k = 0; k < getDepth(); ++k)
+        for(int i = 0; i < getRows(); ++i)
+            for(int j = 0; j < getCols(); ++j)
+            {
+                for(int k2 = 0; k2 < getDepth(); ++k2) avg += (*this).data(i,j,k2);
+                result.data(i,j,k) = avg / getDepth();
+            }
+
+    return result;
 }
 
 DAISGram DAISGram::warhol()
@@ -80,6 +91,59 @@ DAISGram DAISGram::warhol()
     result.data.concat(RG,1);
     GB.concat(RB,1);
     result.data.concat(GB,0);
+
+    return result;
+}
+
+DAISGram DAISGram::sharpen()
+{
+    DAISGram T{*this};
+    Tensor filtro{3,3,1};
+
+    filtro(0,0,0) = 0;
+    filtro(0,1,0) = -1;
+    filtro(0,2,0) = 0;
+    filtro(1,0,0) = -1;
+    filtro(1,1,0) = 5;
+    filtro(1,2,0) = -1;
+    filtro(2,0,0) = 0;
+    filtro(2,1,0) = -1;
+    filtro(2,2,0) = 0;
+
+    T.data = T.data.convolve(filtro);
+    T.data.clamp(0,255);
+    T.data.rescale(255);
+    
+    return T;
+}
+
+//Emboss
+
+DAISGram DAISGram::smooth(int h=3)
+{
+    DAISGram T{*this};
+    Tensor filtro{3,3,1};
+    float c = 1 / (h*h); 
+
+    for(int i = 0; i < filtro.rows(); ++i)
+        for(int j = 0; j < filtro.cols(); ++j)
+            filtro(0,0,0) = c;
+
+    T.data = T.data.convolve(filtro);
+    T.data.rescale(255);
+    
+    return T;
+}
+
+//Edge
+
+DAISGram DAISGram::blend(const DAISGram & rhs, float alpha=0.5)
+{
+    if(getCols() != rhs.getCols() or getRows() != rhs.getRows() or getDepth() != rhs.getDepth()) throw dimension_mismatch();
+
+    DAISGram result{*this};
+
+    result.data = result.data * alpha + rhs.data * (1 - alpha);
 
     return result;
 }
@@ -107,84 +171,23 @@ DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //t
     return result;
 }
 
-DAISGram DAISGram::sharpen()
+//Equalize
+ 
+void DAISGram::generate_random(int h, int w, int d)
 {
-    DAISGram T{*this};
-    Tensor filtro{3,3,1};
-
-    filtro(0,0,0) = 0;
-    filtro(0,1,0) = -1;
-    filtro(0,2,0) = 0;
-    filtro(1,0,0) = -1;
-    filtro(1,1,0) = 5;
-    filtro(1,2,0) = -1;
-    filtro(2,0,0) = 0;
-    filtro(2,1,0) = -1;
-    filtro(2,2,0) = 0;
-
-    T.data = T.data.convolve(filtro);
-    T.data.clamp(0,255);
-    T.data.rescale(255);
-    
-    return T;
+    data = Tensor(h,w,d,0.0);
+    data.init_random(128,50);
+    data.rescale(255);
 }
 
-DAISGram::~DAISGram()
+void _swap(Tensor& T, int rhs, int lhs)
 {
-    data.~Tensor();
-}
-
-DAISGram::DAISGram()
-{
-    data = Tensor();
-}
-
-DAISGram DAISGram::blend(const DAISGram & rhs, float alpha=0.5)
-{
-    if(getCols() != rhs.getCols() or getRows() != rhs.getRows() or getDepth() != rhs.getDepth()) throw dimension_mismatch();
-
-    DAISGram result{*this};
-
-    result.data = result.data * alpha + rhs.data * (1 - alpha);
-
-    return result;
-}
-
-DAISGram DAISGram::smooth(int h=3)
-{
-    DAISGram T{*this};
-    Tensor filtro{3,3,1};
-    float c = 1 / (h*h); 
-
-    for(int i = 0; i < filtro.rows(); ++i)
-        for(int j = 0; j < filtro.cols(); ++j)
-            filtro(0,0,0) = c;
-
-    T.data = T.data.convolve(filtro);
-    T.data.rescale(255);
-    
-    return T;
-}
-
-/**
- * Create a grayscale version of the object
- * 
- * A grayscale image is produced by substituting each pixel with its average on all the channel
- *  
- * @return returns a new DAISGram containing the modified object
- */
-DAISGram DAISGram::grayscale()
-{
-    DAISGram result{*this};
-    float avg = 0.;
-
-    for(int k = 0; k < getDepth(); ++k)
-        for(int i = 0; i < getRows(); ++i)
-            for(int j = 0; j < getCols(); ++j)
-            {
-                for(int k2 = 0; k2 < getDepth(); ++k2) avg += (*this).data(i,j,k2);
-                result.data(i,j,k) = avg / getDepth();
-            }
-
-    return result;
+    Tensor tmp{T};
+ 
+    for (int i = 0; i < T.rows(); ++i)
+        for (int j = 0; j < T.cols(); ++j)
+        {
+            T(i,j,rhs) = tmp(i,j,lhs);
+            T(i,j,lhs) = tmp(i,j,rhs);
+        }
 }
