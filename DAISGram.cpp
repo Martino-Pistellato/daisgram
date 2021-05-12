@@ -149,3 +149,42 @@ DAISGram DAISGram::blend(const DAISGram & rhs, float alpha=0.5)
 
     return result;
 }
+
+DAISGram DAISGram::smooth(int h=3)
+{
+    DAISGram T{*this};
+    Tensor filtro{3,3,1};
+    float c = 1 / (h*h); 
+
+    for(int i = 0; i < filtro.rows(); ++i)
+        for(int j = 0; j < filtro.cols(); ++j)
+            filtro(0,0,0) = c;
+
+    T.data = T.data.convolve(filtro);
+    T.data.rescale(255);
+    
+    return T;
+}
+
+/**
+ * Create a grayscale version of the object
+ * 
+ * A grayscale image is produced by substituting each pixel with its average on all the channel
+ *  
+ * @return returns a new DAISGram containing the modified object
+ */
+DAISGram DAISGram::grayscale()
+{
+    DAISGram result{*this};
+    float avg = 0.;
+
+    for(int k = 0; k < getDepth(); ++k)
+        for(int i = 0; i < getRows(); ++i)
+            for(int j = 0; j < getCols(); ++j)
+            {
+                for(int k2 = 0; k2 < getDepth(); ++k2) avg += (*this).data(i,j,k2);
+                result.data(i,j,k) = avg / getDepth();
+            }
+
+    return result;
+}
