@@ -16,7 +16,15 @@ using namespace std;
 
 int main()
 {   
-    DAISGram dais{};
-    dais.load_image("images/dais.bmp");
-    dais.warhol().save_image("results/prova/dais_warhol.bmp");
+    /*DAISGram dais{};
+    DAISGram bkg{};
+    dais.load_image("images/greenscreen/gs_1.bmp");
+    bkg.load_image("images/greenscreen/gs_2_bkg.bmp");
+    int rgb[3]={0,128,0};
+    float treshold[3]={10,20,10};
+    dais.greenscreen(bkg,&rgb[0],&treshold[0]).save_image("results/prova/dais_green.bmp");*/
+
+    DAISGram emb{};
+    emb.load_image("images/flower_hires.bmp");
+    emb.emboss().save_image("results/prova/dais_emboss.bmp");
 }

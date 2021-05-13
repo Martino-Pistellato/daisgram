@@ -131,7 +131,27 @@ DAISGram DAISGram::sharpen()
     return T;
 }
 
-//Emboss
+DAISGram DAISGram::emboss()
+{
+    DAISGram T{*this};
+    Tensor filtro{3,3,1};
+
+    filtro(0,0,0) = -2;
+    filtro(0,1,0) = -1;
+    filtro(0,2,0) = 0;
+    filtro(1,0,0) = -1;
+    filtro(1,1,0) = 1;
+    filtro(1,2,0) = 1;
+    filtro(2,0,0) = 0;
+    filtro(2,1,0) = 1;
+    filtro(2,2,0) = 2;
+
+    T.data = T.data.convolve(filtro);
+    T.data.clamp(0,255);
+    T.data.rescale(255);
+    
+    return T;
+}
 
 DAISGram DAISGram::smooth(int h)
 {
@@ -159,7 +179,7 @@ DAISGram DAISGram::blend(const DAISGram & rhs, float alpha)
     return result;
 }
 
-DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //threshold = margine errore
+DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //threshold = margine errore, DA CORREGGERE
 {
     if (data.depth() != 3)
         throw dimension_mismatch();
