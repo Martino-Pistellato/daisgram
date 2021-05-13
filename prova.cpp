@@ -7,6 +7,7 @@
 #include "dais_exc.h"
 #include "tensor.cpp"
 #include "DAISGram.cpp"
+#include "libbmp.cpp"
 
 #define PI 3.141592654
 #define FLT_MAX 3.402823466e+38F /* max value */
@@ -16,8 +17,10 @@ using namespace std;
 
 int main()
 {   
-    /*DAISGram dais{}; //Codice per il greenscreen di matrix
-    DAISGram bkg{};
+    DAISGram dais{}; //Codice per il greenscreen di matrix
+    dais.load_image("images/flower_hires.bmp");
+    dais.grayscale().save_image("results/prova/flower_hires_bright.bmp");
+    /*DAISGram bkg{};
     dais.load_image("images/greenscreen/gs_2.bmp");
     bkg.load_image("images/greenscreen/gs_2_bkg.bmp");
     int rgb[3]={80,180,80};

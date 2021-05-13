@@ -256,6 +256,12 @@ void Tensor::init_random(float mean, float std)
 
 void Tensor::init(int r, int c, int d, float v)
 {
+    if (channels)
+    {
+        delete[] channels[0];
+        delete[] channels;
+        channels = nullptr;
+    }
     (*this) = Tensor(r, c, d, v);
 }
 
@@ -296,20 +302,18 @@ Tensor Tensor::padding(int pad_h, int pad_w) const
     return result;
 }
 
-Tensor Tensor::subset(unsigned int row_start, 
-                      unsigned int row_end, 
-                      unsigned int col_start, 
-                      unsigned int col_end, 
-                      unsigned int depth_start, 
-                      unsigned int depth_end) const
+Tensor Tensor::subset(int row_start, 
+                      int row_end, 
+                      int col_start, 
+                      int col_end, 
+                      int depth_start, 
+                      int depth_end) const
 {
-    if (row_start > r or row_end > r or row_start < 0 or row_end < 0)
-        throw dimension_mismatch();
-    if (col_start > c or col_end > c or col_start < 0 or col_end < 0)
-        throw dimension_mismatch();
-    if (depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
-        throw dimension_mismatch();
-
+    if (row_start > r or row_end > r or row_start < 0 or row_end < 0 or
+        col_start > c or col_end > c or col_start < 0 or col_end < 0 or
+        depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
+            throw dimension_mismatch();
+    
     Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
 
     for (int k = depth_start; k < depth_end; ++k)
@@ -454,6 +458,8 @@ void Tensor::read_file(string filename) // dubbio: nella write_file inserisce le
 void Tensor::write_file(string filename)
 {
     ofstream myfile(filename); //open file
+
+    if(!channels) throw tensor_not_initialized();
 
     myfile << r << endl << c << endl << d << endl; //prime tre righe
 

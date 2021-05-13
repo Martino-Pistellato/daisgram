@@ -268,7 +268,7 @@ public:
      * @param depth_end
      * @return the subset of the original tensor
      */
-    Tensor subset(unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end, unsigned int depth_start, unsigned int depth_end)const;
+    Tensor subset(int row_start, int row_end, int col_start, int col_end, int depth_start, int depth_end)const;
 
     /** 
      * Concatenate 

@@ -59,7 +59,20 @@ int DAISGram::getCols()const {return data.cols();}
 
 int DAISGram::getDepth()const {return data.depth();}
 
-//Brighten
+DAISGram DAISGram::brighten(float bright)
+{
+    DAISGram result{*this};
+
+    for(int k = 0; k < getDepth(); ++k)
+        for(int i = 0; i < getRows(); ++i)
+            for(int j = 0; j < getCols(); ++j)
+                result.data(i,j,k) += bright;
+
+    result.data.clamp(0,255);
+    result.data.rescale(255);
+
+    return result;
+}
 
 DAISGram DAISGram::grayscale() 
 {
@@ -69,10 +82,8 @@ DAISGram DAISGram::grayscale()
     for(int i = 0; i < getRows(); ++i)
         for(int j = 0; j < getCols(); ++j)
         {
-            for(int k = 0; k < getDepth(); ++k)
-                avg += (*this).data(i,j,k);
-            for(int k = 0; k < getDepth(); ++k)
-                result.data(i,j,k) = avg / getDepth();
+            for(int k = 0; k < getDepth(); ++k) avg += (*this).data(i,j,k);
+            for(int k = 0; k < getDepth(); ++k) result.data(i,j,k) = avg / (float)getDepth();
             avg = 0;
         }
 
