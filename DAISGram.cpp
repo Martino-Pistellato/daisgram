@@ -177,7 +177,27 @@ DAISGram DAISGram::smooth(int h)
     return T;
 }
 
-//Edge
+DAISGram DAISGram::edge()
+{
+    DAISGram T{*this};
+    Tensor filtro{3,3,1};
+
+    filtro(0,0,0) = -1;
+    filtro(0,1,0) = -1;
+    filtro(0,2,0) = -1;
+    filtro(1,0,0) = -1;
+    filtro(1,1,0) = 8;
+    filtro(1,2,0) = -1;
+    filtro(2,0,0) = -1;
+    filtro(2,1,0) = -1;
+    filtro(2,2,0) = -1;
+
+    T.data = T.data.convolve(filtro);
+    T.data.clamp(0,255);
+    T.data.rescale(255);
+    
+    return T;
+}
 
 DAISGram DAISGram::blend(const DAISGram & rhs, float alpha)
 {
@@ -213,7 +233,19 @@ DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //t
     return result;
 }
 
-//Equalize
+/**
+         * Equalize
+         * 
+         * Stretch the distribution of colors of the image in order to use the full range of intesities.
+         * 
+         * See https://it.wikipedia.org/wiki/Equalizzazione_dell%27istogramma
+         * 
+         * @return returns a new DAISGram containing the equalized image.
+         */  
+DAISGram DAISGram::equalize()
+{
+    
+}
  
 void DAISGram::generate_random(int h, int w, int d)
 {
