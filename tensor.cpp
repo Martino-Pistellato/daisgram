@@ -14,20 +14,6 @@
 
 using namespace std;
 
-void Tensor::stampa() const
-{
-    for (int k = 0; k < d; ++k)
-    {
-        for (int i = 0; i < r; ++i)
-        {
-            for (int j = 0; j < c; ++j)
-                cout << (*this)(i,j,k) << " ";
-            cout << endl;
-        }
-        cout << endl;
-    }
-}
-
 Tensor::Tensor()
 {
     channels = nullptr;
@@ -54,6 +40,58 @@ Tensor::Tensor(int r, int c, int d, float v)
         channels[0][i] = v;
 }
 
+Tensor::Tensor(const Tensor& src)
+{
+    if (src.channels)
+    {
+        this->r = src.r;
+        this->c = src.c;
+        this->d = src.d;
+
+        channels = new float*[d];
+        channels[0] = new float[r*c*d];
+
+        for (int i = 0; i < d; ++i)
+            channels[i] = &channels[0][i*(r*c)];
+
+        for (int i = 0; i < r*c*d; ++i)
+            channels[0][i] = src.channels[0][i];
+    }
+    else
+        channels = nullptr;
+}
+
+void Tensor::init_random(float mean, float std)
+{
+    if(channels){
+
+        std::default_random_engine generator;
+        std::normal_distribution<float> distribution(mean,std);
+
+        for(int i=0;i<r;i++){
+            for(int j=0;j<c;j++){
+                for(int k=0;k<d;k++){
+                    this->operator()(i,j,k)= distribution(generator);
+                }
+            }
+        }    
+
+    }else{
+        throw(tensor_not_initialized());
+    }
+}
+
+void Tensor::init(int r, int c, int d, float v)
+{
+    if (channels)
+    {
+        delete[] channels[0];
+        delete[] channels;
+        channels = nullptr;
+    }
+    (*this) = Tensor(r, c, d, v);
+}
+
 Tensor::~Tensor()
 {
     if (channels)
@@ -66,6 +104,7 @@ Tensor::~Tensor()
 
 float Tensor::operator()(int i, int j, int k) const
 {
+    if (not channels) throw tensor_not_initialized(); //caso i,j,k su tensor vuoto
     if (i < 0 or i > r or j < 0 or j > c or k < 0 or k > d)
         throw index_out_of_bound();
     return channels[k][i*c + j];
@@ -73,30 +112,10 @@ float Tensor::operator()(int i, int j, int k) const
 
 float& Tensor::operator()(int i, int j, int k)
 {
+    if (not channels) throw tensor_not_initialized();
     if (i < 0 or i > r or j < 0 or j > c or k < 0 or k > d)
         throw index_out_of_bound();
-    return channels[k][i*c + j];
-}
-
-Tensor::Tensor(const Tensor& that)
-{
-    if (that.channels)
-    {
-        this->r = that.r;
-        this->c = that.c;
-        this->d = that.d;
-
-        channels = new float*[d];
-        channels[0] = new float[r*c*d];
-
-        for (int i = 0; i < d; ++i)
-            channels[i] = &channels[0][i*(r*c)];
-
-        for (int i = 0; i < r*c*d; ++i)
-            channels[0][i] = that.channels[0][i];
-    }
-    else
-        channels = nullptr;
+    return channels[k][i*c + j]; //formula array C-style, indice riga * nr. colonne + indice colonna
 }
 
 Tensor Tensor::operator-(const Tensor &rhs) const
@@ -238,33 +257,6 @@ Tensor& Tensor::operator=(const Tensor& other)
     return *this;
 }
 
-void Tensor::init_random(float mean, float std)
-{
-    if (channels)
-    {
-        std::default_random_engine generator;
-        std::normal_distribution<float> distribution(mean,std);
-
-        for(int i = 0; i < r; ++i)
-            for(int j = 0; j < c; ++j)
-                for(int k = 0; k < d; ++k)
-                    this->operator()(i,j,k) = distribution(generator);
-    }
-    else
-        throw tensor_not_initialized();
-}
-
-void Tensor::init(int r, int c, int d, float v)
-{
-    if (channels)
-    {
-        delete[] channels[0];
-        delete[] channels;
-        channels = nullptr;
-    }
-    (*this) = Tensor(r, c, d, v);
-}
-
 void Tensor::clamp(float low, float high)
 {
     for (int k = 0; k < d; ++k)
@@ -309,6 +301,7 @@ Tensor Tensor::subset(int row_start,
                       int depth_start, 
                       int depth_end) const
 {
+    if (not channels) throw tensor_not_initialized();
     if (row_start > r or row_end > r or row_start < 0 or row_end < 0 or
         col_start > c or col_end > c or col_start < 0 or col_end < 0 or
         depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
@@ -422,8 +415,10 @@ void Tensor::showSize()const
     cout << r << " x " << c << " x " << d << endl;
 }
 
-ostream& operator<< (ostream& stream, const Tensor & obj)
+ostream& operator<<(ostream& stream, const Tensor & obj)
 {
+    if(not obj.channels) throw tensor_not_initialized();
+
     for(int k = 0; k < obj.d; k++)
     {
         for(int i = 0; i < obj.r; i++)
@@ -441,7 +436,7 @@ void Tensor::read_file(string filename) // dubbio: nella write_file inserisce le
 {
     ifstream myfile(filename); //open file
 
-    if (!myfile.is_open()) throw unable_to_read_file();
+    if (not myfile.is_open()) throw unable_to_read_file();
     
     myfile >> r >> c >> d; //prime tre righe
 
@@ -458,8 +453,6 @@ void Tensor::read_file(string filename) // dubbio: nella write_file inserisce le
 void Tensor::write_file(string filename)
 {
     ofstream myfile(filename); //open file
-
-    if(!channels) throw tensor_not_initialized();
 
     myfile << r << endl << c << endl << d << endl; //prime tre righe
 
