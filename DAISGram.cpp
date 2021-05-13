@@ -179,7 +179,7 @@ DAISGram DAISGram::blend(const DAISGram & rhs, float alpha)
     return result;
 }
 
-DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //threshold = margine errore, DA CORREGGERE
+DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //threshold = margine errore
 {
     if (data.depth() != 3)
         throw dimension_mismatch();
@@ -192,7 +192,7 @@ DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //t
             int tmp = 0;
 
             for (int k = 0; k < result.getDepth(); ++k)
-                tmp += (result.data(i,j,k) >= rgb[k] - threshold[k]) and (result.data(i,j,k) <= rgb[k] + threshold[k]);
+                tmp += ((result.data(i,j,k) >= rgb[k] - threshold[k]) and (result.data(i,j,k) <= rgb[k] + threshold[k]));
 
             if (tmp == result.getDepth())
                 for (int k = 0; k < result.data.depth(); ++k)

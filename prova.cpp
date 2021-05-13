@@ -16,15 +16,19 @@ using namespace std;
 
 int main()
 {   
-    /*DAISGram dais{};
+    /*DAISGram dais{}; //Codice per il greenscreen di matrix
     DAISGram bkg{};
-    dais.load_image("images/greenscreen/gs_1.bmp");
+    dais.load_image("images/greenscreen/gs_2.bmp");
     bkg.load_image("images/greenscreen/gs_2_bkg.bmp");
-    int rgb[3]={0,128,0};
-    float treshold[3]={10,20,10};
+    int rgb[3]={80,180,80};
+    float treshold[3]={80,100,80};
     dais.greenscreen(bkg,&rgb[0],&treshold[0]).save_image("results/prova/dais_green.bmp");*/
 
-    DAISGram emb{};
-    emb.load_image("images/flower_hires.bmp");
-    emb.emboss().save_image("results/prova/dais_emboss.bmp");
+    /*DAISGram dais{}; //Codice per il greenscreen di sebastiano
+    DAISGram bkg{};
+    dais.load_image("images/greenscreen/gs_4.bmp");
+    bkg.load_image("images/greenscreen/gs_4_bkg.bmp");
+    int rgb[3]={235,235,235};
+    float treshold[3]={60,60,60};
+    dais.greenscreen(bkg,&rgb[0],&treshold[0]).save_image("results/prova/dais_2_green.bmp");*/
 }
