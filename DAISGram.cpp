@@ -69,7 +69,6 @@ DAISGram DAISGram::brighten(float bright)
                 result.data(i,j,k) += bright;
 
     result.data.clamp(0,255);
-    result.data.rescale(255);
 
     return result;
 }
@@ -136,8 +135,7 @@ DAISGram DAISGram::sharpen()
     filtro(2,2,0) = 0;
 
     T.data = T.data.convolve(filtro);
-    T.data.clamp(0,255);
-    T.data.rescale(255);
+    T.data.clamp(0,255); 
     
     return T;
 }
@@ -159,19 +157,17 @@ DAISGram DAISGram::emboss()
 
     T.data = T.data.convolve(filtro);
     T.data.clamp(0,255);
-    T.data.rescale(255);
     
     return T;
 }
 
-DAISGram DAISGram::smooth(int h)
-{
+DAISGram DAISGram::smooth(int h)    
+{   //TODO risolvere con interi maggiori, tipo 7
     DAISGram T{*this};
-    float c = 1 / ((float)h * (float)h); 
+    float c = 1.f / (float)(h * h);
     Tensor filtro{3,3,1,c};
     
     T.data = T.data.convolve(filtro);
-    T.data.clamp(0,255);
     T.data.rescale(255);
     
     return T;
@@ -195,7 +191,6 @@ DAISGram DAISGram::edge()
     T = T.grayscale();
     T.data = T.data.convolve(filtro);
     T.data.clamp(0,255);
-    T.data.rescale(255);
     
     return T;
 }
@@ -206,7 +201,7 @@ DAISGram DAISGram::blend(const DAISGram & rhs, float alpha)
 
     DAISGram result{*this};
 
-    result.data = result.data * alpha + rhs.data * (1 - alpha);
+    result.data = data * alpha + rhs.data * (1 - alpha);
 
     return result;
 }
