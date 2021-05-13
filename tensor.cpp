@@ -231,6 +231,8 @@ Tensor Tensor::operator/(const float &rhs) const
 
 Tensor& Tensor::operator=(const Tensor& other)
 {
+    if(this == &other) return *this;
+    
     if (channels)
     {
         delete[] channels[0];

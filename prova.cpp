@@ -17,10 +17,10 @@ using namespace std;
 
 int main()
 {   
-    DAISGram dais{}; //Codice per il greenscreen di matrix
-    dais.load_image("images/flower_hires.bmp");
-    dais.grayscale().save_image("results/prova/flower_hires_bright.bmp");
-    /*DAISGram bkg{};
+    DAISGram dais{}; 
+    dais.load_image("images/dais.bmp");
+    dais.edge().save_image("results/prova/dais_edge.bmp");
+    /*DAISGram bkg{}; //Codice per il greenscreen di matrix
     dais.load_image("images/greenscreen/gs_2.bmp");
     bkg.load_image("images/greenscreen/gs_2_bkg.bmp");
     int rgb[3]={80,180,80};
