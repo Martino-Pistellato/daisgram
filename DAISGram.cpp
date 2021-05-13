@@ -91,7 +91,7 @@ void _swap(Tensor& T, int rhs, int lhs)
         }
 }
 
-DAISGram DAISGram::warhol() //da correggere
+DAISGram DAISGram::warhol() 
 {
     if (data.depth() < 3)
         throw dimension_mismatch(); 
@@ -102,9 +102,9 @@ DAISGram DAISGram::warhol() //da correggere
     _swap(GB,1,2);
     _swap(RB,0,2);
 
-    result.data.concat(RG,1);
-    GB.concat(RB,1);
-    result.data.concat(GB,0);
+    result.data = result.data.concat(RG,1);
+    GB = GB.concat(RB,1);
+    result.data = result.data.concat(GB,0);
 
     return result;
 }

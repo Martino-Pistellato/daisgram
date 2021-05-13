@@ -5,8 +5,8 @@
 #include <fstream>
 
 #include "dais_exc.h"
-#include "tensor.h"
-#include "DAISGram.h"
+#include "tensor.cpp"
+#include "DAISGram.cpp"
 
 #define PI 3.141592654
 #define FLT_MAX 3.402823466e+38F /* max value */
@@ -14,10 +14,9 @@
 
 using namespace std;
 
-
 int main()
-{   ///mnt/c/Users/User/Desktop/daisgram_group_5/
+{   
     DAISGram dais{};
     dais.load_image("images/dais.bmp");
-    dais.smooth(3).save_image("results/prova/dais_smooth_3.bmp");
+    dais.warhol().save_image("results/prova/dais_warhol.bmp");
 }
