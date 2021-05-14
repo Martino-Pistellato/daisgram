@@ -44,21 +44,21 @@ class DAISGram{
          *
          * @return returns the number of rows in the image
          */
-        int getRows()const;
+        int getRows();
 
         /**
          * Get columns
          *
          * @return returns the number of columns in the image
          */
-        int getCols()const;
+        int getCols();
 
         /**
          * Get depth
          *
          * @return returns the number of channels in the image
          */
-        int getDepth()const;
+        int getDepth();
 
         /**
          * Brighten the image
@@ -88,7 +88,7 @@ class DAISGram{
          * - top left is the original image
          * - top right is the original image in which the Red and Green channel are swapped
          * - bottom left is the original image in which the Blue and Green channel are swapped
-         * - bottom right is the original image in which loadannel are swapped
+         * - bottom right is the original image in which the Red and Blue channel are swapped
          *  
          * The output image is twice the dimensions of the original one.
          * 

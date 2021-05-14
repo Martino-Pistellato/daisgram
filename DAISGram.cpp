@@ -53,11 +53,11 @@ void DAISGram::save_image(string filename)
     img.write(filename);
 }
 
-int DAISGram::getRows()const {return data.rows();}
+int DAISGram::getRows() {return data.rows();}
 
-int DAISGram::getCols()const {return data.cols();}
+int DAISGram::getCols() {return data.cols();}
 
-int DAISGram::getDepth()const {return data.depth();}
+int DAISGram::getDepth() {return data.depth();}
 
 DAISGram DAISGram::brighten(float bright)
 {
@@ -197,8 +197,7 @@ DAISGram DAISGram::edge()
 
 DAISGram DAISGram::blend(const DAISGram & rhs, float alpha)
 {
-    if(getCols() != rhs.getCols() or getRows() != rhs.getRows() or getDepth() != rhs.getDepth()) throw dimension_mismatch();
-
+    if(getCols() != rhs.data.cols() or getRows() != rhs.data.rows() or getDepth() != rhs.data.depth()) throw dimension_mismatch();
     DAISGram result{*this};
 
     result.data = data * alpha + rhs.data * (1 - alpha);
@@ -226,6 +225,36 @@ DAISGram DAISGram::greenscreen(DAISGram & bkg, int rgb[], float threshold[]) //t
                     result.data(i,j,k) = bkg.data(i,j,k);
         }
             
+    return result;
+}
+ 
+DAISGram DAISGram::equalize() //chiamare grayscale da main
+{
+    int depth = getDepth(), rows = getRows(), cols = getCols();
+    DAISGram result{*this};
+
+    for (int k = 0; k < depth; ++k)
+    {
+        float vector[256] = {};
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                vector[(int)(*this).data(i,j,k)]++;
+
+        float val{0}, c = 1, cdfmin{};
+        for (int i = 0; i < 256; ++i)
+            if (vector[i])
+            {
+                vector[i] += val;
+                val = vector[i];
+                if(c) cdfmin = vector[i] + (--c);
+            }
+        
+        float den = rows*cols - cdfmin;
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                result.data(i,j,k) = roundf((((vector[(int)(*this).data(i,j,k)]) - cdfmin) / den) * 255); // v = (int)(*this).data(i,j,k)
+    }
+    
     return result;
 }
  

@@ -12,6 +12,8 @@
 #define PI 3.141592654
 #define FLT_MAX 3.402823466e+38F /* max value */
 #define FLT_MIN 1.175494351e-38F /* min positive value */
+#define EPSILON 0.000001f  /* the rounding precision for comparing floats */
+
 
 using namespace std;
 
@@ -27,7 +29,6 @@ private:
 
 public:
 
-    void stampa()const; //TODO #2 DA ELIMINARE
     /**
      * Class constructor
      * 
@@ -84,6 +85,37 @@ public:
      * @return the new Tensor
      */
     Tensor(const Tensor& that);
+
+    /**
+     * Operator overloading ==
+     * 
+     * It performs the point-wise equality check between two Tensors.
+     * 
+     * The equality check between floating points cannot be simply performed using the 
+     * operator == but it should take care on their approximation.
+     * 
+     * This approximation is known as rounding (do you remember "Architettura degli Elaboratori"?)
+     *  
+     * For example, given a=0.1232 and b=0.1233 they are 
+     * - the same, if we consider a rounding with 1, 2 and 3 decimals 
+     * - different when considering 4 decimal points. In this case b>a
+     * 
+     * So, given two floating point numbers "a" and "b", how can we check their equivalence? 
+     * through this formula:
+     * 
+     * a ?= b if and only if |a-b|<EPSILON
+     * 
+     * where EPSILON is fixed constant (defined at the beginning of this header file)
+     * 
+     * Two tensors A and B are the same if:
+     * A[i][j][k] == B[i][j][k] for all i,j,k 
+     * where == is the above formula.
+     * 
+     * The two tensors must have the same size otherwise throw a dimension_mismatch()
+     * 
+     * @return returns true if all their entries are "floating" equal
+     */
+    bool operator==(const Tensor& rhs) const;
 
     /**
      * Operator overloading -
@@ -231,7 +263,9 @@ public:
      * 
      * where max(k) and min(k) are the maximum and minimum value in the k-th channel.
      * 
-     * new_max is the new value for the maximum
+     * new_max is the new maximum value for each channel
+     * 
+     * - if max(k) and min(k) are the same, then the entire k-th channel is set to new_max.
      * 
      * @param new_max New maximum vale
      */
@@ -268,7 +302,7 @@ public:
      * @param depth_end
      * @return the subset of the original tensor
      */
-    Tensor subset(int row_start, int row_end, int col_start, int col_end, int depth_start, int depth_end)const;
+    Tensor subset(unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end, unsigned int depth_start, unsigned int depth_end)const;
 
     /** 
      * Concatenate 
@@ -299,7 +333,7 @@ public:
      * 
      * The filter f must have odd dimensions and same depth. 
      * 
-     * Remember to apply the padding before running the convolution
+     * Remeber to apply the padding before running the convolution
      *  
      * @param f The filter
      * @return a new Tensor containing the result of the convolution

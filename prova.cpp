@@ -19,7 +19,7 @@ int main()
 {   
     DAISGram dais{}; 
     dais.load_image("images/dais.bmp");
-    dais.brighten(10).save_image("results/prova/dais_bright.bmp");
+    dais.equalize().save_image("results/prova/dais_equalize.bmp");
     /*DAISGram bkg{}; //Codice per il greenscreen di matrix
     dais.load_image("images/greenscreen/gs_2.bmp");
     bkg.load_image("images/greenscreen/gs_2_bkg.bmp");

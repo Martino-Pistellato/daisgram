@@ -11,6 +11,7 @@
 #define PI 3.141592654
 #define FLT_MAX 3.402823466e+38F /* max value */
 #define FLT_MIN 1.175494351e-38F /* min positive value */
+#define EPSILON 0.000001f  /* the rounding precision for comparing floats */
 
 using namespace std;
 
@@ -259,6 +260,21 @@ Tensor& Tensor::operator=(const Tensor& other)
     return *this;
 }
 
+bool Tensor::operator==(const Tensor& rhs) const
+{
+    bool equality = true;
+    int k = 0;
+    while (equality and k < d)
+    {
+        for (int i = 0; i < r; ++i)
+            for (int j = 0; j < c; ++j)
+                equality = (fabs((*this)(i,j,k)-rhs(i,j,k)) < EPSILON);
+        k++;
+    }
+    
+    return equality;
+}
+
 void Tensor::clamp(float low, float high)
 {
     for (int k = 0; k < d; ++k)
@@ -296,12 +312,12 @@ Tensor Tensor::padding(int pad_h, int pad_w) const
     return result;
 }
 
-Tensor Tensor::subset(int row_start, 
-                      int row_end, 
-                      int col_start, 
-                      int col_end, 
-                      int depth_start, 
-                      int depth_end) const
+Tensor Tensor::subset(unsigned int row_start, 
+                      unsigned int row_end, 
+                      unsigned int col_start, 
+                      unsigned int col_end, 
+                      unsigned int depth_start, 
+                      unsigned int depth_end) const
 {
     if (not channels) throw tensor_not_initialized();
     if (row_start > r or row_end > r or row_start < 0 or row_end < 0 or
@@ -309,7 +325,12 @@ Tensor Tensor::subset(int row_start,
         depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
             throw dimension_mismatch();
     
-    Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
+    //Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
+    Tensor result{};
+    result.r = row_end - row_start;
+    result.c = col_end - col_start;
+    result.d = depth_end - depth_start;
+    result.init(r,c,d);
 
     for (int k = depth_start; k < depth_end; ++k)
         for (int i = row_start; i < row_end; ++i)
