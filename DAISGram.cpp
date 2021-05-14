@@ -63,11 +63,7 @@ DAISGram DAISGram::brighten(float bright)
 {
     DAISGram result{*this};
 
-    for(int k = 0; k < getDepth(); ++k)
-        for(int i = 0; i < getRows(); ++i)
-            for(int j = 0; j < getCols(); ++j)
-                result.data(i,j,k) += bright;
-
+    result.data = result.data + bright;
     result.data.clamp(0,255);
 
     return result;
@@ -164,7 +160,7 @@ DAISGram DAISGram::emboss()
 DAISGram DAISGram::smooth(int h)    
 {   //TODO risolvere con interi maggiori, tipo 7
     DAISGram T{*this};
-    float c = 1.f / (float)(h * h);
+    float c = 1 / (float)(h * h);
     Tensor filtro{3,3,1,c};
     
     T.data = T.data.convolve(filtro);

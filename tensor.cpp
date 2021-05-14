@@ -322,15 +322,14 @@ Tensor Tensor::subset(unsigned int row_start,
     if (not channels) throw tensor_not_initialized();
     if (row_start > r or row_end > r or row_start < 0 or row_end < 0 or
         col_start > c or col_end > c or col_start < 0 or col_end < 0 or
-        depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0)
-            throw dimension_mismatch();
+        depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0) throw dimension_mismatch();
     
     //Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
     Tensor result{};
     result.r = row_end - row_start;
     result.c = col_end - col_start;
     result.d = depth_end - depth_start;
-    result.init(r,c,d);
+    result.init(result.r,result.c,result.d);
 
     for (int k = depth_start; k < depth_end; ++k)
         for (int i = row_start; i < row_end; ++i)
@@ -370,31 +369,23 @@ Tensor Tensor::convolve(const Tensor &f) const
 {
     if (f.r % 2 == 0 or f.c % 2 == 0) throw filter_odd_dimensions();
 
-    int pad_h = (f.r - 1) / 2;
-    int pad_w = (f.c - 1) / 2;
+    int pad_h = (f.r - 1) / 2, pad_w = (f.c - 1) / 2;
     Tensor result{r,c,d}, tmp_tensor{};
-    int col_start{0};
     float tmp_float{0};
 
     tmp_tensor = padding(pad_h,pad_w);
 
     for (int i = 0; i < r; ++i)
-    {
         for (int j = 0; j < c; ++j)
-        {
             for (int k = 0; k < d; k++)
             {
                 for (int i2 = i; i2 < i + f.r; ++i2)
-                    for (int j2 = col_start; j2 < col_start + f.c; ++j2)
-                        tmp_float += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - col_start, 0);
+                    for (int j2 = j; j2 < j + f.c; ++j2)
+                        tmp_float += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - j, 0);
 
                 result(i,j,k) = tmp_float;
                 tmp_float = 0;
             }
-            col_start++;
-        }
-        col_start = 0;
-    }
 
     return result;
 }
