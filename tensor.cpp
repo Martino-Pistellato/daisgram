@@ -353,14 +353,12 @@ Tensor Tensor::concat(const Tensor &rhs, int axis) const
     for (int k = 0; k < result.d; ++k) //k for depth, i for rows and j for columns
         for (int i = 0; i < result.r; ++i)
             for (int j = 0; j < result.c; ++j)
-            {
                 switch (axis)
                 {
                     case 1: (j >= c) ? result(i,j,k) = rhs(i,j-c,k) : result(i,j,k) = (*this)(i,j,k); break;
                     case 2: (k >= d) ? result(i,j,k) = rhs(i,j,k-d) : result(i,j,k) = (*this)(i,j,k); break;
                     default: (i >= r) ? result(i,j,k) = rhs(i-r,j,k) : result(i,j,k) = (*this)(i,j,k); break; //default case is axis == 0
                 }
-            }
 
     return result;
 }
@@ -371,21 +369,15 @@ Tensor Tensor::convolve(const Tensor &f) const
 
     int pad_h = (f.r - 1) / 2, pad_w = (f.c - 1) / 2;
     Tensor result{r,c,d}, tmp_tensor{};
-    float tmp_float{0};
 
     tmp_tensor = padding(pad_h,pad_w);
 
     for (int i = 0; i < r; ++i)
         for (int j = 0; j < c; ++j)
             for (int k = 0; k < d; k++)
-            {
                 for (int i2 = i; i2 < i + f.r; ++i2)
                     for (int j2 = j; j2 < j + f.c; ++j2)
-                        tmp_float += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - j, 0);
-
-                result(i,j,k) = tmp_float;
-                tmp_float = 0;
-            }
+                        result(i,j,k) += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - j, 0);
 
     return result;
 }

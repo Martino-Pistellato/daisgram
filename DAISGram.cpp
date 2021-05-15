@@ -69,7 +69,7 @@ DAISGram DAISGram::brighten(float bright)
     return result;
 }
 
-DAISGram DAISGram::grayscale() 
+DAISGram DAISGram::grayscale()
 {
     DAISGram result{*this};
     float avg = 0.;
@@ -157,8 +157,8 @@ DAISGram DAISGram::emboss()
     return T;
 }
 
-DAISGram DAISGram::smooth(int h)    
-{   //TODO risolvere con interi maggiori, tipo 7
+DAISGram DAISGram::smooth(int h)
+{   //TODO #4 risolvere con interi maggiori, tipo 7
     DAISGram T{*this};
     float c = 1 / (float)(h * h);
     Tensor filtro{3,3,1,c};

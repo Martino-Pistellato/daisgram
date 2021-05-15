@@ -19,8 +19,10 @@ int main()
 {   
     DAISGram dais{}; 
     dais.load_image("images/dais.bmp");
-    dais.equalize().save_image("results/prova/dais_equalize.bmp");
-    /*DAISGram bkg{}; //Codice per il greenscreen di matrix
+    dais.emboss().save_image("results/prova/dais_equalized.bmp");
+
+    /*DAISGram dais{};
+    DAISGram bkg{}; //Codice per il greenscreen di matrix
     dais.load_image("images/greenscreen/gs_2.bmp");
     bkg.load_image("images/greenscreen/gs_2_bkg.bmp");
     int rgb[3]={80,180,80};
