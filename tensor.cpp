@@ -465,7 +465,7 @@ void Tensor::write_file(string filename)
     for(int k = 0; k < d; k++)
         for(int i = 0; i < r; i++)
             for(int j = 0; j < c; j++)
-                myfile << (*this)(i,j,k) << endl;
+                myfile << (int)(*this)(i,j,k) << endl;
     
     myfile.close();
 }
