@@ -158,13 +158,12 @@ DAISGram DAISGram::emboss()
 }
 
 DAISGram DAISGram::smooth(int h)
-{   //TODO #4 risolvere con interi maggiori, tipo 7
+{   
     DAISGram T{*this};
     float c = 1 / (float)(h * h);
-    Tensor filtro{3,3,1,c};
+    Tensor filtro{h,h,1,c};
     
     T.data = T.data.convolve(filtro);
-    T.data.rescale(255);
     
     return T;
 }

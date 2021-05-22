@@ -235,10 +235,8 @@ Tensor& Tensor::operator=(const Tensor& other)
     if(this == &other) return *this;
     
     if (channels)
-    {
-        delete[] channels[0];
-        delete[] channels;
-    }
+        (*this).~Tensor();
+
     if (other.channels)
     {
         this->r = other.r;
