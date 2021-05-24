@@ -318,21 +318,20 @@ Tensor Tensor::subset(unsigned int row_start,
                       unsigned int depth_end) const
 {
     if (not channels) throw tensor_not_initialized();
-    if (row_start > r or row_end > r or row_start < 0 or row_end < 0 or
-        col_start > c or col_end > c or col_start < 0 or col_end < 0 or
-        depth_start > d or depth_end > d or depth_start < 0 or depth_end < 0) throw dimension_mismatch();
+    if ((int)row_start > r or (int)row_end > r or (int)row_start < 0 or (int)row_end < 0 or
+        (int)col_start > c or (int)col_end > c or (int)col_start < 0 or (int)col_end < 0 or
+        (int)depth_start > d or (int)depth_end > d or (int)depth_start < 0 or (int)depth_end < 0) throw dimension_mismatch();
     
-    //Tensor result{row_end - row_start, col_end - col_start, depth_end - depth_start};
     Tensor result{};
     result.r = row_end - row_start;
     result.c = col_end - col_start;
     result.d = depth_end - depth_start;
     result.init(result.r,result.c,result.d);
 
-    for (int k = depth_start; k < depth_end; ++k)
-        for (int i = row_start; i < row_end; ++i)
-            for (int j = col_start; j < col_end; ++j)
-                result(i - row_start, j - col_start, k - depth_start) = (*this)(i,j,k);
+    for (int k = (int)depth_start; k < (int)depth_end; ++k)
+        for (int i = (int)row_start; i < (int)row_end; ++i)
+            for (int j = (int)col_start; j < (int)col_end; ++j)
+                result(i - (int)row_start, j - (int)col_start, k - (int)depth_start) = (*this)(i,j,k);
 
     return result;
 }
