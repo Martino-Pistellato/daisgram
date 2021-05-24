@@ -8,15 +8,9 @@
 
 using namespace std;
 
-DAISGram::DAISGram()
-{
-    data = Tensor();
-}
+DAISGram::DAISGram() {}
 
-DAISGram::~DAISGram()
-{
-    data.~Tensor();
-}
+DAISGram::~DAISGram() {}
 
 void DAISGram::load_image(string filename)
 {
