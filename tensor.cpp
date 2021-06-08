@@ -174,7 +174,7 @@ Tensor Tensor::operator/(const Tensor &rhs) const
                 if (rhs(i,j,k))
                     result(i,j,k) /= rhs(i,j,k);
                 else
-                    throw unknown_operation();
+                    throw unknown_exception();
             }
 
     return result;
@@ -218,7 +218,7 @@ Tensor Tensor::operator*(const float &rhs) const
 
 Tensor Tensor::operator/(const float &rhs) const
 {
-    if (not rhs) throw unknown_operation();
+    if (not rhs) throw unknown_exception();
 
     Tensor result{*this};
 
