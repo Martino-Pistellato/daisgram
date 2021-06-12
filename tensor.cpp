@@ -374,7 +374,7 @@ Tensor Tensor::convolve(const Tensor &f) const
             for (int k = 0; k < d; k++)
                 for (int i2 = i; i2 < i + f.r; ++i2)
                     for (int j2 = j; j2 < j + f.c; ++j2)
-                        result(i,j,k) += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - j, 0);
+                        result(i,j,k) += tmp_tensor(i2,j2,k) * f(i2 - i, j2 - j, k);
 
     return result;
 }
