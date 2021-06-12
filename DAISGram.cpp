@@ -112,17 +112,20 @@ DAISGram DAISGram::warhol()
 DAISGram DAISGram::sharpen()
 {
     DAISGram T{*this};
-    Tensor filtro{3,3,1};
+    Tensor filtro{3,3,3};
 
-    filtro(0,0,0) = 0;
-    filtro(0,1,0) = -1;
-    filtro(0,2,0) = 0;
-    filtro(1,0,0) = -1;
-    filtro(1,1,0) = 5;
-    filtro(1,2,0) = -1;
-    filtro(2,0,0) = 0;
-    filtro(2,1,0) = -1;
-    filtro(2,2,0) = 0;
+    for (int i = 0; i < 3; ++i)
+    {
+        filtro(0,0,i) = 0;
+        filtro(0,1,i) = -1;
+        filtro(0,2,i) = 0;
+        filtro(1,0,i) = -1;
+        filtro(1,1,i) = 5;
+        filtro(1,2,i) = -1;
+        filtro(2,0,i) = 0;
+        filtro(2,1,i) = -1;
+        filtro(2,2,i) = 0;
+    }
 
     T.data = T.data.convolve(filtro);
     T.data.clamp(0,255); 
@@ -133,17 +136,19 @@ DAISGram DAISGram::sharpen()
 DAISGram DAISGram::emboss()
 {
     DAISGram T{*this};
-    Tensor filtro{3,3,1};
-
-    filtro(0,0,0) = -2;
-    filtro(0,1,0) = -1;
-    filtro(0,2,0) = 0;
-    filtro(1,0,0) = -1;
-    filtro(1,1,0) = 1;
-    filtro(1,2,0) = 1;
-    filtro(2,0,0) = 0;
-    filtro(2,1,0) = 1;
-    filtro(2,2,0) = 2;
+    Tensor filtro{3,3,3};
+    for (int i = 0; i < 3; ++i)
+    {
+        filtro(0,0,i) = -2;
+        filtro(0,1,i) = -1;
+        filtro(0,2,i) = 0;
+        filtro(1,0,i) = -1;
+        filtro(1,1,i) = 1;
+        filtro(1,2,i) = 1;
+        filtro(2,0,i) = 0;
+        filtro(2,1,i) = 1;
+        filtro(2,2,i) = 2;
+    }
 
     T.data = T.data.convolve(filtro);
     T.data.clamp(0,255);
@@ -155,7 +160,7 @@ DAISGram DAISGram::smooth(int h)
 {   
     DAISGram T{*this};
     float c = 1 / (float)(h * h);
-    Tensor filtro{h,h,1,c};
+    Tensor filtro{h,h,3,c};
     
     T.data = T.data.convolve(filtro);
     
@@ -165,17 +170,20 @@ DAISGram DAISGram::smooth(int h)
 DAISGram DAISGram::edge()
 {
     DAISGram T{*this};
-    Tensor filtro{3,3,1};
+    Tensor filtro{3,3,3};
 
-    filtro(0,0,0) = -1;
-    filtro(0,1,0) = -1;
-    filtro(0,2,0) = -1;
-    filtro(1,0,0) = -1;
-    filtro(1,1,0) = 8;
-    filtro(1,2,0) = -1;
-    filtro(2,0,0) = -1;
-    filtro(2,1,0) = -1;
-    filtro(2,2,0) = -1;
+    for (int i = 0; i < 3; ++i)
+    {
+        filtro(0,0,i) = -1;
+        filtro(0,1,i) = -1;
+        filtro(0,2,i) = -1;
+        filtro(1,0,i) = -1;
+        filtro(1,1,i) = 8;
+        filtro(1,2,i) = -1;
+        filtro(2,0,i) = -1;
+        filtro(2,1,i) = -1;
+        filtro(2,2,i) = -1;
+    }
 
     T = T.grayscale();
     T.data = T.data.convolve(filtro);
@@ -241,7 +249,7 @@ DAISGram DAISGram::equalize() //chiamare grayscale da main
         float den = rows*cols - cdfmin;
         for (int i = 0; i < rows; ++i)
             for (int j = 0; j < cols; ++j)
-                result.data(i,j,k) = roundf((((vector[(int)(*this).data(i,j,k)]) - cdfmin) / den) * 255); // v = (int)(*this).data(i,j,k)
+                result.data(i,j,k) = roundf(((vector[(int)(*this).data(i,j,k)] - cdfmin) / den) * 255); // v = (int)(*this).data(i,j,k)
     }
     
     return result;

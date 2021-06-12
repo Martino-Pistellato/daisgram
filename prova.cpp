@@ -18,9 +18,13 @@ using namespace std;
 int main()
 {   
     DAISGram dais{}; 
-    dais.load_image("images/dais.bmp");
-    dais.smooth(5).save_image("results/prova/dais_smooth_5.bmp");
+    /*dais.load_image("images/dais.bmp");
+    dais.edge().save_image("results/prova/dais_edge_new.bmp");*/
 
+    Tensor t{};
+    t.read_file("tensors/t_100_60_2_random.txt");
+    t.write_file("results/prova_write.txt");
+    cout << t << endl;
     /*DAISGram dais{};
     DAISGram bkg{}; //Codice per il greenscreen di matrix
     dais.load_image("images/greenscreen/gs_2.bmp");
